@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Red vs Blue: Check for check | research by rashele.com</title>
+    <title>Red vs Blue: Forensic Audit | research by rashele.com</title>
     <style>
         :root {
             --hot-pink: #ff007f;
@@ -23,7 +23,7 @@
             max-width: 1500px;
             margin: auto;
             display: grid;
-            grid-template-columns: 1.2fr 1fr;
+            grid-template-columns: 1.4fr 1fr;
             gap: 20px;
         }
 
@@ -35,12 +35,13 @@
             box-shadow: 0 0 15px rgba(255, 0, 127, 0.2);
         }
 
-        .tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+        .tool-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 15px; }
 
         .tool-btn {
             background: #222; color: white; border: 1px solid var(--hot-pink);
-            padding: 10px; border-radius: 4px; cursor: pointer; font-size: 0.72em;
+            padding: 8px; border-radius: 4px; cursor: pointer; font-size: 0.62em;
             font-weight: bold; transition: 0.2s; text-transform: uppercase;
+            white-space: nowrap; overflow: hidden;
         }
 
         .tool-active { background: var(--hot-pink) !important; box-shadow: 0 0 10px var(--hot-pink); }
@@ -49,7 +50,7 @@
         
         .code-box {
             background: #000; border: 1px solid #333; padding: 12px;
-            border-radius: 4px; min-height: 280px; font-size: 0.75em;
+            border-radius: 4px; min-height: 380px; font-size: 0.72em;
             overflow-y: auto;
         }
 
@@ -79,18 +80,24 @@
             <button class="tool-btn" id="btn-ram" onclick="showPair('ram')">Mask Device Memory</button>
             <button class="tool-btn" id="btn-api" onclick="showPair('api')">Mask Native Hooks</button>
             <button class="tool-btn" id="btn-view" onclick="showPair('view')">Virtual Viewport</button>
+            
             <button class="tool-btn" id="btn-gpu" onclick="showPair('gpu')">WebGL GPU Mask</button>
-            <button class="tool-btn" id="btn-ext" onclick="showPair('ext')">Spoof GPU Extensions</button>
-            <button class="tool-btn" id="btn-canvas" onclick="showPair('canvas')">Poison Canvas Hash</button>
-            <button class="tool-btn" id="btn-tz" onclick="showPair('tz')">Fix Timezone Drift</button>
+            <button class="tool-btn" id="btn-ext" onclick="showPair('ext')">Spoof GPU Ext</button>
+            <button class="tool-btn" id="btn-canvas" onclick="showPair('canvas')">Poison Canvas</button>
+            <button class="tool-btn" id="btn-tz" onclick="showPair('tz')">Fix TZ Drift</button>
+            
             <button class="tool-btn" id="btn-proxy" onclick="showPair('proxy')">Resident Proxy</button>
             <button class="tool-btn" id="btn-ttl" onclick="showPair('ttl')">Mask TCP TTL</button>
             <button class="tool-btn" id="btn-bat" onclick="showPair('bat')">Battery Fuzzer</button>
-            <button class="tool-btn" id="btn-font" onclick="showPair('font')">Standard Font List</button>
+            <button class="tool-btn" id="btn-font" onclick="showPair('font')">Standard Fonts</button>
+            
             <button class="tool-btn" id="btn-audio" onclick="showPair('audio')">Audio Noise Gen</button>
             <button class="tool-btn" id="btn-agent" onclick="showPair('agent')">User-Agent Spoofer</button>
             <button class="tool-btn" id="btn-shadow" onclick="showPair('shadow')">Shadow Nav Props</button>
             <button class="tool-btn" id="btn-orient" onclick="showPair('orient')">Force Landscape</button>
+
+            <button class="tool-btn" style="border-color: #fff;" onclick="showPair('proxy_trap')">Advanced Proxy Trap</button>
+            <button class="tool-btn" style="border-color: #fff;" onclick="showPair('font_bbox')">Font B-Box Audit</button>
         </div>
 
         <div class="code-container">
@@ -123,12 +130,12 @@
 <script>
     const fullStack = {
         cpu: {
-            red: "// RED TEAM: Overwrite hardware count.\nObject.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });",
+            red: "// RED TEAM: Overwrite hardware count.\nObject.defineProperty(navigator, 'hardwareConcurrency', {\n  get: () => 8, configurable: true \n});",
             blue: "// FORENSIC TEAM: Measure compute delta.\nif (benchmarkTime > TARGET_8CORE_MS) {\n  flag('Perf-to-Core Ratio Anomaly');\n}",
             insight: "Forensic teams flag devices where the reported CPU power doesn't match the actual execution time for math stress tests."
         },
         ram: {
-            red: "// RED TEAM: Mask memory to appear as 16GB.\nObject.defineProperty(navigator, 'deviceMemory', { get: () => 16 });",
+            red: "// RED TEAM: Mask memory to 16GB.\nObject.defineProperty(navigator, 'deviceMemory', {\n  get: () => 16, configurable: true \n});",
             blue: "// FORENSIC TEAM: Check hardware pairing logic.\nif (ram >= 16 && cores <= 2) {\n  flag('Impossible Hardware Profile');\n}",
             insight: "High-end memory with low-end compute is a primary signature of a manually constructed 'Frankenstein' device."
         },
@@ -150,7 +157,7 @@
         ext: {
             red: "// RED TEAM: Report advanced GPU capabilities.\ngl.getSupportedExtensions().push('WEBGL_draw_buffers');",
             blue: "// FORENSIC TEAM: Verify functional extension support.\nif (extSupported && !canActuallyDrawToBuffers()) {\n  flag('GPU Capability Mismatch');\n}",
-            insight: "Forensic teams verify if the GPU can actually *perform* the functions it claims to support via extensions."
+            insight: "Forensic teams verify if the GPU can actually perform the functions it claims to support via extensions."
         },
         canvas: {
             red: "// RED TEAM: Inject pixel-level noise.\nctx.getImageData = () => { /* Noise injection */ };",
@@ -163,24 +170,24 @@
             insight: "Even if the zone name is changed, the system clock's millisecond offset often leaks the true location."
         },
         proxy: {
-            red: "// RED TEAM: Block WebRTC to hide local IP.\nconst rtcConfig = { iceServers: [] };",
-            blue: "// FORENSIC TEAM: Detect silent RTC disabling.\nif (userAgentSupportsRTC() && iceServers.length === 0) {\n  flag('Stealth Proxy Mitigation');\n}",
-            insight: "Forensic teams flag when a browser that should natively support WebRTC has its servers surgically stripped."
+            red: "// RED TEAM: Route through Resident Proxy pool.\n// Uses backconnect/rotating gateways.",
+            blue: "// FORENSIC TEAM: Audit Latency & Jitter.\nconst jitter = Math.abs(ping1 - ping2);\nif (jitter > 150 || packetLoss > 0.05) {\n  flag('Resident Proxy Network Profile');\n}",
+            insight: "Resident proxies are often slow and inconsistent. High jitter or TCP retransmissions signal a proxied or mangled connection."
         },
         ttl: {
-            red: "// RED TEAM: Attempt to mask OS-level TCP signals.\n// (Requires system-level modification)",
-            blue: "// FORENSIC TEAM: Inspect TCP/IP stack signals.\nif (userAgent === 'Mac' && tcpTTL === 128) {\n  flag('OS-Stack Identity Conflict');\n}",
-            insight: "TCP TTL values are OS-specific. A 'Mac' reporting a Windows-default TTL of 128 is a major Frankenstein signal."
+            red: "// RED TEAM: Impossible via JS.\n// Requires Registry/Sysctl edit to match spoofed OS.\n// Example: Set Win DefaultTTL to 64 to look like Mac.",
+            blue: "// FORENSIC TEAM: Inspect TCP/IP stack signals.\nif (userAgent.includes('Mac') && tcpTTL !== 64) {\n  flag('OS-Stack Identity Conflict');\n} else if (userAgent.includes('Win') && tcpTTL !== 128) {\n  flag('TTL Signature Mismatch');\n}",
+            insight: "TCP TTL is OS-specific. A 'Mac' browser sending a Windows-default TTL of 128 is a dead giveaway of a Frankenstein device."
         },
         bat: {
-            red: "// RED TEAM: Fix battery to avoid stitching.\nnavigator.getBattery = () => Promise.resolve({ level: 0.85 });",
+            red: "// RED TEAM: Fix battery level.\nnavigator.getBattery = () => Promise.resolve({ level: 0.85 });",
             blue: "// FORENSIC TEAM: Audit discharge drift.\nif (level === 0.85 && dischargeDelta === 0) {\n  flag('Static Battery Signature');\n}",
             insight: "Real hardware always shows active discharge. A frozen battery level is a hardcoded spoof signature."
         },
         font: {
             red: "// RED TEAM: Report only generic system fonts.\ndocument.fonts.query = () => ['Arial', 'Helvetica'];",
             blue: "// FORENSIC TEAM: Check font list entropy.\nif (fonts.length < 5) {\n  flag('Environment Sanitization Detected');\n}",
-            insight: "Reporting too few fonts is actually more suspicious than reporting many; it signals a hardened, non-native environment."
+            insight: "Reporting too few fonts is actually more suspicious than reporting many; it signals a hardened environment."
         },
         audio: {
             red: "// RED TEAM: Add jitter to the audio sample rate.\nconst noise = Math.random() * 0.0001;",
@@ -200,19 +207,31 @@
         orient: {
             red: "// RED TEAM: Force landscape to match desktop spoof.\nscreen.orientation.lock('landscape-primary');",
             blue: "// FORENSIC TEAM: Compare Aspect Ratio vs Orient.\nif (height > width && orientation === 'landscape') {\n  flag('Orientation Logic Conflict');\n}",
-            insight: "A portrait-sized resolution (Height > Width) claiming to be 'Landscape' is a classic Frankenstein error."
+            insight: "A portrait-sized resolution claiming to be 'Landscape' is a classic Frankenstein error."
+        },
+        proxy_trap: {
+            red: "// RED TEAM: Proxy wrap the Navigator object.\nnavigator = new Proxy(navigator, { get: (t, p) => t[p] });",
+            blue: "// FORENSIC TEAM: Detect Proxy via error stack.\ntry { navigator.plugins.arguments; } \ncatch (e) { if (e.message.includes('Proxy')) flag('JS Proxy Detected'); }",
+            insight: "Accessing non-existent properties on a Proxy often throws unique engine-level errors that native objects won't."
+        },
+        font_bbox: {
+            red: "// RED TEAM: Report custom fonts as present.\nwindow.fonts = ['Roboto', 'Open Sans'];",
+            blue: "// FORENSIC TEAM: Measure bounding box width.\nif (span.offsetWidth === arialWidth && name !== 'Arial') {\n  flag('Font Masking Detected');\n}",
+            insight: "If a font claims to be 'Roboto' but its pixel width matches 'Arial', the browser has triggered a fallback."
         }
     };
 
     function showPair(tool) {
         document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('tool-active'));
-        document.getElementById(`btn-${tool}`).classList.add('tool-active');
+        const btn = document.getElementById(`btn-${tool}`) || document.querySelector(`[onclick="showPair('${tool}')"]`);
+        if (btn) btn.classList.add('tool-active');
         
         document.getElementById('red-display').innerText = fullStack[tool].red;
         document.getElementById('blue-display').innerText = fullStack[tool].blue;
         document.getElementById('forensic-insight').innerText = fullStack[tool].insight;
         
-        document.getElementById('risk-value').innerText = Math.floor(Math.random() * 30 + 70) + "%";
+        const risk = Math.floor(Math.random() * 25 + 75);
+        document.getElementById('risk-value').innerText = risk + "%";
         document.getElementById('verdict').innerText = "FRANKENSTEIN DEVICE DETECTED";
     }
 </script>
