@@ -50,7 +50,7 @@
         
         .code-box {
             background: #000; border: 1px solid #333; padding: 12px;
-            border-radius: 4px; min-height: 380px; font-size: 0.72em;
+            border-radius: 4px; min-height: 400px; font-size: 0.72em;
             overflow-y: auto;
         }
 
@@ -83,13 +83,13 @@
             
             <button class="tool-btn" id="btn-gpu" onclick="showPair('gpu')">WebGL GPU Mask</button>
             <button class="tool-btn" id="btn-ext" onclick="showPair('ext')">Spoof GPU Ext</button>
-            <button class="tool-btn" id="btn-canvas" onclick="showPair('canvas')">Poison Canvas</button>
+            <button class="tool-btn" id="btn-canvas" onclick="showPair('canvas')">Poison Canvas Hash</button>
             <button class="tool-btn" id="btn-tz" onclick="showPair('tz')">Fix TZ Drift</button>
             
             <button class="tool-btn" id="btn-proxy" onclick="showPair('proxy')">Resident Proxy</button>
             <button class="tool-btn" id="btn-ttl" onclick="showPair('ttl')">Mask TCP TTL</button>
             <button class="tool-btn" id="btn-bat" onclick="showPair('bat')">Battery Fuzzer</button>
-            <button class="tool-btn" id="btn-font" onclick="showPair('font')">Standard Fonts</button>
+            <button class="tool-btn" id="btn-font" onclick="showPair('font')">Standard Font List</button>
             
             <button class="tool-btn" id="btn-audio" onclick="showPair('audio')">Audio Noise Gen</button>
             <button class="tool-btn" id="btn-agent" onclick="showPair('agent')">User-Agent Spoofer</button>
@@ -98,6 +98,8 @@
 
             <button class="tool-btn" style="border-color: #fff;" onclick="showPair('proxy_trap')">Advanced Proxy Trap</button>
             <button class="tool-btn" style="border-color: #fff;" onclick="showPair('font_bbox')">Font B-Box Audit</button>
+            <button class="tool-btn" style="border-color: #fff;" onclick="showPair('ice_leak')">ICE Candidate Audit</button>
+            <button class="tool-btn" style="border-color: #fff;" onclick="showPair('mobile_emu')">Mobile Emulator Audit</button>
         </div>
 
         <div class="code-container">
@@ -175,8 +177,8 @@
             insight: "Resident proxies are often slow and inconsistent. High jitter or TCP retransmissions signal a proxied or mangled connection."
         },
         ttl: {
-            red: "// RED TEAM: Impossible via JS.\n// Requires Registry/Sysctl edit to match spoofed OS.\n// Example: Set Win DefaultTTL to 64 to look like Mac.",
-            blue: "// FORENSIC TEAM: Inspect TCP/IP stack signals.\nif (userAgent.includes('Mac') && tcpTTL !== 64) {\n  flag('OS-Stack Identity Conflict');\n} else if (userAgent.includes('Win') && tcpTTL !== 128) {\n  flag('TTL Signature Mismatch');\n}",
+            red: "// RED TEAM: Set OS-specific TCP/IP stack signals.\n// Requires Registry edit to look like Mac (TTL 64).",
+            blue: "// FORENSIC TEAM: Inspect TCP/IP stack signals.\nif (userAgent.includes('Mac') && tcpTTL !== 64) {\n  flag('OS-Stack Identity Conflict');\n}",
             insight: "TCP TTL is OS-specific. A 'Mac' browser sending a Windows-default TTL of 128 is a dead giveaway of a Frankenstein device."
         },
         bat: {
@@ -218,6 +220,16 @@
             red: "// RED TEAM: Report custom fonts as present.\nwindow.fonts = ['Roboto', 'Open Sans'];",
             blue: "// FORENSIC TEAM: Measure bounding box width.\nif (span.offsetWidth === arialWidth && name !== 'Arial') {\n  flag('Font Masking Detected');\n}",
             insight: "If a font claims to be 'Roboto' but its pixel width matches 'Arial', the browser has triggered a fallback."
+        },
+        ice_leak: {
+            red: "// RED TEAM: Mask the leak by forcing mDNS or stripping candidates.\nRTCPeerConnection.prototype.addIceCandidate = () => Promise.resolve();",
+            blue: "// FORENSIC TEAM: Force out-of-band STUN query.\npc.onicecandidate = (e) => {\n  if (e.candidate && e.candidate.candidate.includes('typ host')) {\n    flag('VPN Bypass: Local IP Leaked via ICE');\n  }\n};",
+            insight: "WebRTC operates outside the proxy tunnel. Forensic engines force a STUN request to reveal the real local IP."
+        },
+        mobile_emu: {
+            red: "// RED TEAM: Emulate iPhone on high-end server.\nObject.defineProperty(navigator, 'platform', { get: () => 'iPhone' });",
+            blue: "// FORENSIC TEAM: Audit sensor stasis & core density.\nif (platform === 'iPhone' && Math.abs(x_accel + y_accel) === 0) {\n  flag('Sensor Stasis: Synthetic Environment');\n} else if (cores > 12) {\n  flag('Core Density: Server Profile detected');\n}",
+            insight: "Emulators lack real sensor noise and often leak server-level core counts (32+) that don't exist on phones."
         }
     };
 
