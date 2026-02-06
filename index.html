@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Red vs Blue: Check for check | research by rashele.com</title>
+    <style>
+        :root {
+            --hot-pink: #ff007f;
+            --blue-team: #00d4ff;
+            --maroon-dark: #1a000d;
+            --bg-black: #0a0a0a;
+        }
+
+        body {
+            background: var(--bg-black);
+            color: #cccccc;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0; padding: 20px;
+        }
+
+        #game-container {
+            max-width: 1500px;
+            margin: auto;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 20px;
+        }
+
+        #hacker-side {
+            background: var(--maroon-dark);
+            border: 2px solid #800000;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.2);
+        }
+
+        .tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+
+        .tool-btn {
+            background: #222; color: white; border: 1px solid var(--hot-pink);
+            padding: 10px; border-radius: 4px; cursor: pointer; font-size: 0.72em;
+            font-weight: bold; transition: 0.2s; text-transform: uppercase;
+        }
+
+        .tool-active { background: var(--hot-pink) !important; box-shadow: 0 0 10px var(--hot-pink); }
+
+        .code-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; }
+        
+        .code-box {
+            background: #000; border: 1px solid #333; padding: 12px;
+            border-radius: 4px; min-height: 280px; font-size: 0.75em;
+            overflow-y: auto;
+        }
+
+        .red-code { color: #00ff00; font-family: 'Courier New', monospace; white-space: pre-wrap; }
+        .blue-logic { color: var(--blue-team); font-family: 'Courier New', monospace; white-space: pre-wrap; }
+
+        #audit-side {
+            background: #000; border: 2px solid var(--blue-team);
+            border-radius: 12px; padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+        }
+
+        #risk-box { text-align:center; padding: 15px; border: 1px dashed var(--blue-team); background: #000d1a; }
+        #risk-value { font-size: 3.2em; font-weight: 900; color: var(--blue-team); }
+        
+        .audit-summary { margin-top: 20px; font-size: 0.85em; line-height: 1.6; }
+        .section-label { font-size: 0.65em; font-weight: bold; margin-bottom: 5px; display: block; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="hacker-side">
+        <h2 style="color: var(--hot-pink); margin:0 0 10px 0;">Red Team: Injection Console (CHECK)</h2>
+        <div class="tool-grid">
+            <button class="tool-btn" id="btn-cpu" onclick="showPair('cpu')">Spoof 8-Core CPU</button>
+            <button class="tool-btn" id="btn-ram" onclick="showPair('ram')">Mask Device Memory</button>
+            <button class="tool-btn" id="btn-api" onclick="showPair('api')">Mask Native Hooks</button>
+            <button class="tool-btn" id="btn-view" onclick="showPair('view')">Virtual Viewport</button>
+            <button class="tool-btn" id="btn-gpu" onclick="showPair('gpu')">WebGL GPU Mask</button>
+            <button class="tool-btn" id="btn-ext" onclick="showPair('ext')">Spoof GPU Extensions</button>
+            <button class="tool-btn" id="btn-canvas" onclick="showPair('canvas')">Poison Canvas Hash</button>
+            <button class="tool-btn" id="btn-tz" onclick="showPair('tz')">Fix Timezone Drift</button>
+            <button class="tool-btn" id="btn-proxy" onclick="showPair('proxy')">Resident Proxy</button>
+            <button class="tool-btn" id="btn-ttl" onclick="showPair('ttl')">Mask TCP TTL</button>
+            <button class="tool-btn" id="btn-bat" onclick="showPair('bat')">Battery Fuzzer</button>
+            <button class="tool-btn" id="btn-font" onclick="showPair('font')">Standard Font List</button>
+            <button class="tool-btn" id="btn-audio" onclick="showPair('audio')">Audio Noise Gen</button>
+            <button class="tool-btn" id="btn-agent" onclick="showPair('agent')">User-Agent Spoofer</button>
+            <button class="tool-btn" id="btn-shadow" onclick="showPair('shadow')">Shadow Nav Props</button>
+            <button class="tool-btn" id="btn-orient" onclick="showPair('orient')">Force Landscape</button>
+        </div>
+
+        <div class="code-container">
+            <div>
+                <span class="section-label" style="color:var(--hot-pink)">RED TEAM INJECTION</span>
+                <div class="code-box red-code" id="red-display">// Select a tool...</div>
+            </div>
+            <div>
+                <span class="section-label" style="color:var(--blue-team)">FORENSIC TEAM LOGIC</span>
+                <div class="code-box blue-logic" id="blue-display">// Analysis target...</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="audit-side">
+        <h2 style="color: var(--blue-team); margin:0 0 10px 0;">Forensic Audit Engine (FOR CHECK)</h2>
+        <div id="risk-box">
+            <small>ANOMALY RISK SCORE</small>
+            <div id="risk-value">0%</div>
+            <div id="verdict" style="font-weight:bold;">CLEAN BASELINE</div>
+        </div>
+        
+        <div class="audit-summary">
+            <strong>Forensic Investigator Insights:</strong><br>
+            <span id="forensic-insight">Analyze how we deconstruct "Frankenstein" devices by identifying logical gaps between reported and physical behaviors.</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    const fullStack = {
+        cpu: {
+            red: "// RED TEAM: Overwrite hardware count.\nObject.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });",
+            blue: "// FORENSIC TEAM: Measure compute delta.\nif (benchmarkTime > TARGET_8CORE_MS) {\n  flag('Perf-to-Core Ratio Anomaly');\n}",
+            insight: "Forensic teams flag devices where the reported CPU power doesn't match the actual execution time for math stress tests."
+        },
+        ram: {
+            red: "// RED TEAM: Mask memory to appear as 16GB.\nObject.defineProperty(navigator, 'deviceMemory', { get: () => 16 });",
+            blue: "// FORENSIC TEAM: Check hardware pairing logic.\nif (ram >= 16 && cores <= 2) {\n  flag('Impossible Hardware Profile');\n}",
+            insight: "High-end memory with low-end compute is a primary signature of a manually constructed 'Frankenstein' device."
+        },
+        api: {
+            red: "// RED TEAM: Mask the interception layer.\nsetTimeout.toString = () => 'function setTimeout() { [native code] }';",
+            blue: "// FORENSIC TEAM: Audit via prototype call.\nif (!Function.prototype.toString.call(fn).includes('[native code]')) {\n  flag('Hooked Native Function');\n}",
+            insight: "Auditors bypass simple masking by calling the original Prototype string to see if a function is truly native."
+        },
+        view: {
+            red: "// RED TEAM: Force desktop resolution.\nwindow.innerWidth = 1920; screen.width = 1920;",
+            blue: "// FORENSIC TEAM: Check coordinate sanity.\nif (window.outerWidth < window.innerWidth) {\n  flag('Coordinate Consistency Failure');\n}",
+            insight: "A physical window cannot be wider than its own outer frame. Inconsistent viewports are an immediate forensic red flag."
+        },
+        gpu: {
+            red: "// RED TEAM: Change reported GPU vendor.\ngl.getParameter(UNMASKED_RENDERER_WEBGL) = 'NVIDIA 4090';",
+            blue: "// FORENSIC TEAM: Compare vendor vs renderer logic.\nif (vendor === 'NVIDIA' && renderer === 'SwiftShader') {\n  flag('Software Renderer Leak');\n}",
+            insight: "If the vendor says NVIDIA but the browser falls back to a software renderer like SwiftShader, the GPU is spoofed."
+        },
+        ext: {
+            red: "// RED TEAM: Report advanced GPU capabilities.\ngl.getSupportedExtensions().push('WEBGL_draw_buffers');",
+            blue: "// FORENSIC TEAM: Verify functional extension support.\nif (extSupported && !canActuallyDrawToBuffers()) {\n  flag('GPU Capability Mismatch');\n}",
+            insight: "Forensic teams verify if the GPU can actually *perform* the functions it claims to support via extensions."
+        },
+        canvas: {
+            red: "// RED TEAM: Inject pixel-level noise.\nctx.getImageData = () => { /* Noise injection */ };",
+            blue: "// FORENSIC TEAM: Analyze global entropy.\nif (isUniqueInGlobalPool(hash)) {\n  flag('Artificially Poisoned Canvas');\n}",
+            insight: "A hash that is 100% unique across millions of users is statistically artificial and indicates active poisoning."
+        },
+        tz: {
+            red: "// RED TEAM: Match proxy timezone.\nIntl.DateTimeFormat.prototype.resolvedOptions = () => ({ timeZone: 'Chicago' });",
+            blue: "// FORENSIC TEAM: Check clock skew vs offset.\nif (new Date().getTimezoneOffset() !== chicagoOffset) {\n  flag('Temporal Offset Mismatch');\n}",
+            insight: "Even if the zone name is changed, the system clock's millisecond offset often leaks the true location."
+        },
+        proxy: {
+            red: "// RED TEAM: Block WebRTC to hide local IP.\nconst rtcConfig = { iceServers: [] };",
+            blue: "// FORENSIC TEAM: Detect silent RTC disabling.\nif (userAgentSupportsRTC() && iceServers.length === 0) {\n  flag('Stealth Proxy Mitigation');\n}",
+            insight: "Forensic teams flag when a browser that should natively support WebRTC has its servers surgically stripped."
+        },
+        ttl: {
+            red: "// RED TEAM: Attempt to mask OS-level TCP signals.\n// (Requires system-level modification)",
+            blue: "// FORENSIC TEAM: Inspect TCP/IP stack signals.\nif (userAgent === 'Mac' && tcpTTL === 128) {\n  flag('OS-Stack Identity Conflict');\n}",
+            insight: "TCP TTL values are OS-specific. A 'Mac' reporting a Windows-default TTL of 128 is a major Frankenstein signal."
+        },
+        bat: {
+            red: "// RED TEAM: Fix battery to avoid stitching.\nnavigator.getBattery = () => Promise.resolve({ level: 0.85 });",
+            blue: "// FORENSIC TEAM: Audit discharge drift.\nif (level === 0.85 && dischargeDelta === 0) {\n  flag('Static Battery Signature');\n}",
+            insight: "Real hardware always shows active discharge. A frozen battery level is a hardcoded spoof signature."
+        },
+        font: {
+            red: "// RED TEAM: Report only generic system fonts.\ndocument.fonts.query = () => ['Arial', 'Helvetica'];",
+            blue: "// FORENSIC TEAM: Check font list entropy.\nif (fonts.length < 5) {\n  flag('Environment Sanitization Detected');\n}",
+            insight: "Reporting too few fonts is actually more suspicious than reporting many; it signals a hardened, non-native environment."
+        },
+        audio: {
+            red: "// RED TEAM: Add jitter to the audio sample rate.\nconst noise = Math.random() * 0.0001;",
+            blue: "// FORENSIC TEAM: Audit noise floor stasis.\nif (audioCtx.sampleRate !== hardwareExpected) {\n  flag('Impossible Audio Profile');\n}",
+            insight: "Artificial jitter in the audio context contradicts the precision of real hardware sample rates."
+        },
+        agent: {
+            red: "// RED TEAM: Change UA to high-value device.\nnavigator.userAgent = 'iPhone...';",
+            blue: "// FORENSIC TEAM: Cross-check Platform ID.\nif (ua.includes('iPhone') && platform === 'Win32') {\n  flag('UA vs Platform Mismatch');\n}",
+            insight: "Forensic teams flag when the high-level User-Agent conflicts with low-level kernel architecture reports."
+        },
+        shadow: {
+            red: "// RED TEAM: Use descriptors to hide property changes.\nObject.defineProperty(navigator, 'languages', { configurable: true });",
+            blue: "// FORENSIC TEAM: Attempt property deletion.\nif (delete navigator.languages === true) {\n  flag('Shadowed Property Detected');\n}",
+            insight: "Native properties are non-configurable. If an auditor can delete 'navigator.languages', it has been shadowed."
+        },
+        orient: {
+            red: "// RED TEAM: Force landscape to match desktop spoof.\nscreen.orientation.lock('landscape-primary');",
+            blue: "// FORENSIC TEAM: Compare Aspect Ratio vs Orient.\nif (height > width && orientation === 'landscape') {\n  flag('Orientation Logic Conflict');\n}",
+            insight: "A portrait-sized resolution (Height > Width) claiming to be 'Landscape' is a classic Frankenstein error."
+        }
+    };
+
+    function showPair(tool) {
+        document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('tool-active'));
+        document.getElementById(`btn-${tool}`).classList.add('tool-active');
+        
+        document.getElementById('red-display').innerText = fullStack[tool].red;
+        document.getElementById('blue-display').innerText = fullStack[tool].blue;
+        document.getElementById('forensic-insight').innerText = fullStack[tool].insight;
+        
+        document.getElementById('risk-value').innerText = Math.floor(Math.random() * 30 + 70) + "%";
+        document.getElementById('verdict').innerText = "FRANKENSTEIN DEVICE DETECTED";
+    }
+</script>
+</body>
+</html>
