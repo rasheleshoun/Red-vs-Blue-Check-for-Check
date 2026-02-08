@@ -14,32 +14,14 @@
             --console-green: #00ff41;
         }
 
-        body {
-            background: var(--bg-black);
-            color: #cccccc;
-            font-family: 'Segoe UI', 'Courier New', sans-serif;
-            margin: 0; padding: 20px;
-        }
-
-        #game-container {
-            max-width: 1600px;
-            margin: auto;
-            display: grid;
-            grid-template-columns: 1.5fr 1fr;
-            gap: 20px;
-        }
-
-        @media (max-width: 1100px) {
-            #game-container { grid-template-columns: 1fr; }
-            #audit-side { position: relative !important; top: 0 !important; }
-        }
+        body { background: var(--bg-black); color: #cccccc; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
+        #game-container { max-width: 1600px; margin: auto; display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
+        
+        @media (max-width: 1100px) { #game-container { grid-template-columns: 1fr; } }
 
         #hacker-side {
-            background: var(--maroon-dark);
-            border: 2px solid #800000;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 0 15px rgba(255, 0, 127, 0.2);
+            background: var(--maroon-dark); border: 2px solid #800000;
+            border-radius: 12px; padding: 20px; box-shadow: 0 0 15px rgba(255, 0, 127, 0.2);
         }
 
         .tool-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
@@ -63,9 +45,8 @@
         .code-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .code-box {
             background: #000; border: 1px solid #333; padding: 12px;
-            border-radius: 4px; min-height: 480px; font-size: 0.72em;
-            overflow-y: auto; font-family: 'Courier New', monospace;
-            white-space: pre-wrap;
+            border-radius: 4px; height: 520px; font-size: 0.72em;
+            overflow-y: auto; font-family: 'Courier New', monospace; white-space: pre-wrap;
         }
 
         #audit-side {
@@ -74,29 +55,18 @@
             display: flex; flex-direction: column; gap: 15px;
         }
 
-        #risk-box { text-align:center; padding: 15px; border: 1px dashed var(--blue-team); background: #000d1a; transition: 0.5s; }
+        #risk-box { text-align:center; padding: 15px; border: 1px dashed var(--blue-team); background: #000d1a; }
         #risk-value { font-size: 3.5em; font-weight: 900; color: var(--blue-team); }
-        
         #console-feed {
-            background: #050505;
-            border: 1px solid #222;
-            height: 220px;
-            padding: 10px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.75em;
-            color: var(--console-green);
-            overflow-y: auto;
-            border-radius: 4px;
-            box-shadow: inset 0 0 10px #000;
+            background: #050505; border: 1px solid #222; height: 180px; padding: 10px;
+            font-family: 'Courier New', monospace; font-size: 0.75em; color: var(--console-green);
+            overflow-y: auto; border-radius: 4px;
         }
         .console-entry { margin-bottom: 4px; border-left: 2px solid var(--blue-team); padding-left: 8px; }
-        .console-ts { color: #555; margin-right: 5px; }
         .console-alert { color: var(--hot-pink); font-weight: bold; }
-
         .btn-group { display: flex; gap: 10px; }
         .reset-btn { background: transparent; color: #555; border: 1px solid #333; cursor: pointer; padding: 5px 10px; font-size: 0.7em; }
         .stress-btn { background: var(--blue-team); color: black; border: none; font-weight: bold; cursor: pointer; padding: 5px 12px; font-size: 0.7em; border-radius: 4px; }
-        .stress-btn:hover { background: white; }
     </style>
 </head>
 <body>
@@ -106,34 +76,40 @@
         <h2 style="color: var(--hot-pink); margin:0 0 15px 0;">Red Team: Full Injection Stack</h2>
         
         <div class="tool-grid">
-            <div class="category-label">IP & Network Forensics</div>
+            <div class="category-label">Network & IP Anonymization</div>
             <button class="tool-btn" id="btn-socket_ip" onclick="toggleTool('socket_ip')">Socket IP</button>
             <button class="tool-btn" id="btn-leaked_ip" onclick="toggleTool('leaked_ip')">Leaked IP</button>
+            <button class="tool-btn" id="btn-proxy" onclick="toggleTool('proxy')">Resident Proxy</button>
             <button class="tool-btn" id="btn-masking_ip" onclick="toggleTool('masking_ip')">Masking IP</button>
             <button class="tool-btn" id="btn-nameserver_ip" onclick="toggleTool('nameserver_ip')">Nameserver IP</button>
-            <button class="tool-btn" id="btn-proxy" onclick="toggleTool('proxy')">Resident Proxy</button>
             <button class="tool-btn" id="btn-ttl" onclick="toggleTool('ttl')">TCP TTL</button>
-            <button class="tool-btn" id="btn-ice_leak" onclick="toggleTool('ice_leak')">ICE Leak Audit</button>
-            <button class="tool-btn" id="btn-proxy_trap" onclick="toggleTool('proxy_trap')">Proxy Trap</button>
+            <button class="tool-btn" id="btn-ice_leak" onclick="toggleTool('ice_leak')">ICE Leak</button>
+
+            <div class="category-label">Mobile Physical Invariants</div>
+            <button class="tool-btn" id="btn-motion" onclick="toggleTool('motion')">Motion Entropy</button>
+            <button class="tool-btn" id="btn-thermal" onclick="toggleTool('thermal')">Thermal Decay</button>
+            <button class="tool-btn" id="btn-mag" onclick="toggleTool('mag')">Mag-Field Stasis</button>
+            <button class="tool-btn" id="btn-touch" onclick="toggleTool('touch')">Touch Radius</button>
 
             <div class="category-label">Hardware Profile Spoofing</div>
             <button class="tool-btn" id="btn-cpu" onclick="toggleTool('cpu')">Spoof CPU</button>
             <button class="tool-btn" id="btn-ram" onclick="toggleTool('ram')">Mask RAM</button>
             <button class="tool-btn" id="btn-gpu" onclick="toggleTool('gpu')">WebGL GPU</button>
             <button class="tool-btn" id="btn-ext" onclick="toggleTool('ext')">GPU Ext</button>
+            <button class="tool-btn" id="btn-canvas" onclick="toggleTool('canvas')">Poison Canvas</button>
             <button class="tool-btn" id="btn-bat" onclick="toggleTool('bat')">Battery Fuzzer</button>
             <button class="tool-btn" id="btn-audio" onclick="toggleTool('audio')">Audio Noise</button>
-            <button class="tool-btn" id="btn-canvas" onclick="toggleTool('canvas')">Poison Canvas</button>
+            <button class="tool-btn" id="btn-font" onclick="toggleTool('font')">Font List</button>
             <button class="tool-btn" id="btn-mobile_emu" onclick="toggleTool('mobile_emu')">Mobile Emu</button>
 
-            <div class="category-label">Environment Sanitization</div>
+            <div class="category-label">Tamper-Evidence & Integrity Check</div>
+            <button class="tool-btn" id="btn-proxy_trap" onclick="toggleTool('proxy_trap')">Proxy Trap</button>
             <button class="tool-btn" id="btn-api" onclick="toggleTool('api')">Native Hooks</button>
-            <button class="tool-btn" id="btn-view" onclick="toggleTool('view')">Virtual View</button>
-            <button class="tool-btn" id="btn-tz" onclick="toggleTool('tz')">Fix TZ Drift</button>
-            <button class="tool-btn" id="btn-font" onclick="toggleTool('font')">Font List</button>
-            <button class="tool-btn" id="btn-agent" onclick="toggleTool('agent')">User-Agent</button>
             <button class="tool-btn" id="btn-shadow" onclick="toggleTool('shadow')">Shadow Props</button>
+            <button class="tool-btn" id="btn-view" onclick="toggleTool('view')">Virtual View</button>
             <button class="tool-btn" id="btn-orient" onclick="toggleTool('orient')">Orientation</button>
+            <button class="tool-btn" id="btn-tz" onclick="toggleTool('tz')">TZ Drift</button>
+            <button class="tool-btn" id="btn-agent" onclick="toggleTool('agent')">User-Agent</button>
             <button class="tool-btn" id="btn-font_bbox" onclick="toggleTool('font_bbox')">Font B-Box</button>
         </div>
 
@@ -145,25 +121,18 @@
 
     <div id="audit-side">
         <h2 style="color: var(--blue-team); margin:0;">Forensic Audit Engine</h2>
-        
         <div id="risk-box">
             <small>ANOMALY RISK SCORE</small>
             <div id="risk-value">0%</div>
             <div id="verdict">CLEAN BASELINE</div>
         </div>
-
         <div style="font-size: 0.85em;">
             <strong>Investigator Insight:</strong><br>
-            <span id="forensic-insight" style="font-style:italic; color: #aaa;">Initialize injections to begin forensic trace.</span>
+            <span id="forensic-insight" style="font-style:italic; color: #aaa;">Select a module to analyze.</span>
         </div>
-
-        <div>
-            <small style="color: var(--blue-team); font-weight: bold; letter-spacing: 1px;">LIVE EVENT LOG</small>
-            <div id="console-feed">
-                <div class="console-entry">> Audit engine initialized. Waiting for packets...</div>
-            </div>
+        <div id="console-feed">
+            <div class="console-entry">> Audit engine active. Monitoring API calls...</div>
         </div>
-
         <div class="btn-group">
             <button class="stress-btn" onclick="startStressTest()">INIT STRESS TEST</button>
             <button class="reset-btn" onclick="resetAudit()">RESET ENVIRONMENT</button>
@@ -174,148 +143,144 @@
 <script>
     const fullStack = {
         socket_ip: { 
-            red: "// RED TEAM: Spoof the 'Claimed' identity.\n// Manually injects a 'trusted' IP into proxy headers to trick the app.\nheaders['X-Forwarded-For'] = '72.14.201.24';", 
-            blue: "// BLUE TEAM: Audit Socket vs Connection.\n// Cross-references the HTTP header against the actual low-level TCP socket.\nif (socketIP !== tcpSourceIP) {\n  flag('Header Manipulation Detected');\n}", 
-            insight: "Compares reported headers against actual TCP source to find manual spoofs.", 
-            weight: 15 
+            red: "// RED TEAM: Spoof the 'Claimed' identity.\n// Manually injects a 'trusted' IP into common proxy headers.\nheaders['X-Forwarded-For'] = '72.14.201.24';", 
+            blue: "// BLUE TEAM: Audit Socket vs Connection.\n// Cross-references the HTTP header against the actual low-level TCP connection.\nif (socketIP !== tcpSourceIP) {\n  flag('Socket IP Header Manipulation Detected');\n}", 
+            insight: "Verifies if the 'claimed' IP matches the actual TCP connection origin.", weight: 15 
         },
         leaked_ip: { 
             red: "// RED TEAM: Attempt to strip WebRTC candidates.\n// Overwrites the WebRTC API to prevent gathering local network addresses.\nRTCPeerConnection.prototype.addIceCandidate = null;", 
-            blue: "// BLUE TEAM: Force UDP/STUN Pierce.\n// Monitors events for 'host' candidates which bypass VPN/Proxy tunnels.\nif (e.candidate.includes('typ host')) {\n  flag('Internal origin detected');\n}", 
-            insight: "WebRTC often bypasses the tunnel to reveal the real origin.", 
-            weight: 40 
-        },
-        masking_ip: { 
-            red: "// RED TEAM: Wrap traffic in a Resident Proxy pool.\n// Route through intermediary hops to make traffic look like a home user.", 
-            blue: "// BLUE TEAM: Analyze RTT & Hop Count.\n// Measures latency; multiple proxy hops create a distinctive lag signature.\nif (roundTripTime > 200 || hops > 15) {\n  flag('Anomalous Network Latency');\n}", 
-            insight: "Masking IPs introduce latency signatures not found in direct connections.", 
-            weight: 20 
-        },
-        nameserver_ip: { 
-            red: "// RED TEAM: Use a global DNS (8.8.8.8).\n// Forces specific DNS to avoid ISP tracking, often forgetting geo-sync.", 
-            blue: "// BLUE TEAM: Geo-Distance Audit.\n// Checks if the DNS resolver is geographically close to the user's IP.\nif (distance(SocketIP, NameserverIP) > 500) {\n  flag('DNS Location Mismatch');\n}", 
-            insight: "Mismatching DNS location leaks the user's real-world profile.", 
-            weight: 15 
-        },
-        cpu: { 
-            red: "// RED TEAM: Overwrite hardware count.\n// Modifies navigator property to claim a high-performance CPU.\nObject.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });", 
-            blue: "// BLUE TEAM: Measure compute delta.\n// Runs a math benchmark; if an 8-core CPU is slow, it's a spoof.\nif (benchmarkTime > TARGET_8CORE_MS) {\n  flag('Perf-to-Core Ratio Anomaly');\n}", 
-            insight: "Flags devices where CPU power doesn't match reported core count.", 
-            weight: 15 
-        },
-        ram: { 
-            red: "// RED TEAM: Mask memory to 16GB.\n// Spoofs deviceMemory API to suggest high-end hardware.\nObject.defineProperty(navigator, 'deviceMemory', { get: () => 16 });", 
-            blue: "// BLUE TEAM: Check hardware pairing logic.\n// Flags impossible combos (e.g., 16GB RAM on a 1-core machine).\nif (ram >= 16 && cores <= 2) {\n  flag('Impossible Hardware Profile');\n}", 
-            insight: "High RAM with low compute is a signature of synthetic devices.", 
-            weight: 15 
-        },
-        api: { 
-            red: "// RED TEAM: Mask the interception layer.\n// Fakes 'toString' to hide that native functions were overwritten.\nsetTimeout.toString = () => 'function setTimeout() { [native code] }';", 
-            blue: "// BLUE TEAM: Audit via prototype call.\n// Uses Function Prototype to get the true identity, bypassing fake strings.\nif (!Function.prototype.toString.call(fn).includes('[native code]')) {\n  flag('Hooked Native Function');\n}", 
-            insight: "Bypasses simple masking by calling the original Prototype string.", 
-            weight: 25 
-        },
-        view: { 
-            red: "// RED TEAM: Force desktop resolution.\n// Fakes window size to look like a standard 1080p desktop.\nwindow.innerWidth = 1920; screen.width = 1920;", 
-            blue: "// BLUE TEAM: Check coordinate sanity.\n// Physical check: content area cannot be larger than the window frame.\nif (window.outerWidth < window.innerWidth) {\n  flag('Coordinate Consistency Failure');\n}", 
-            insight: "Physical windows cannot be wider than their own frames.", 
-            weight: 30 
-        },
-        gpu: { 
-            red: "// RED TEAM: Change reported GPU vendor.\n// Manually sets renderer string to a high-end card (e.g., NVIDIA 4090).\ngl.getParameter(RENDERER) = 'NVIDIA 4090';", 
-            blue: "// BLUE TEAM: Compare vendor vs renderer.\n// Detects 'SwiftShader' (emulator) hiding behind a high-end name.\nif (vendor === 'NVIDIA' && renderer === 'SwiftShader') {\n  flag('Software Renderer Leak');\n}", 
-            insight: "Software renderers reveal spoofed high-end hardware names.", 
-            weight: 20 
-        },
-        ext: { 
-            red: "// RED TEAM: Report advanced GPU capabilities.\n// Claims support for advanced WebGL features to look legitimate.", 
-            blue: "// BLUE TEAM: Verify functional support.\n// Tries to use the feature; if it fails while 'supported', it's a lie.\nif (extSupported && !canActuallyDrawToBuffers()) {\n  flag('GPU Capability Mismatch');\n}", 
-            insight: "Verifies if the GPU can actually perform functions it claims to support.", 
-            weight: 15 
-        },
-        canvas: { 
-            red: "// RED TEAM: Inject pixel-level noise.\n// Randomizes pixel data to prevent unique canvas fingerprinting.\nctx.getImageData = () => { /* Noise injection */ };", 
-            blue: "// BLUE TEAM: Analyze global entropy.\n// If the pixel hash is 100% unique globally, it is statistically noise.\nif (isUniqueInGlobalPool(hash)) {\n  flag('Artificially Poisoned Canvas');\n}", 
-            insight: "100% unique hashes across millions of users are statistically artificial.", 
-            weight: 35 
-        },
-        tz: { 
-            red: "// RED TEAM: Match proxy timezone.\n// Spoofs JS TimeZone object to match the proxy location.\nIntl.DateTimeFormat = () => ({ timeZone: 'Chicago' });", 
-            blue: "// BLUE TEAM: Check clock skew vs offset.\n// Compares spoofed name against actual system clock offset.\nif (new Date().getTimezoneOffset() !== chicagoOffset) {\n  flag('Temporal Offset Mismatch');\n}", 
-            insight: "The system clock offset often leaks the true location.", 
-            weight: 15 
+            blue: "// BLUE TEAM: Force UDP/STUN Pierce.\n// Monitors events for 'host' candidates which bypass VPN/Proxy tunnels.\nif (e.candidate.includes('typ host')) {\n  flag('Leaked IP: Internal origin detected outside tunnel');\n}", 
+            insight: "WebRTC often bypasses VPNs to reveal the real internal IP.", weight: 40 
         },
         proxy: { 
-            red: "// RED TEAM: Route through Resident Proxy pool.\n// Hides data-center origin behind a home-user IP.", 
-            blue: "// BLUE TEAM: Audit Latency & Jitter.\n// Resident proxies have high variance (jitter) in packet arrival.\nif (jitter > 150) { flag('Resident Proxy Profile'); }", 
-            insight: "High jitter or TCP retransmissions signal a proxied connection.", 
-            weight: 25 
+            red: "// RED TEAM: Route through Resident Proxy pool.\n// Hides data-center origin behind a home-user IP node.", 
+            blue: "// BLUE TEAM: Audit Latency & Jitter.\n// Residential proxies have high variance (jitter) in packet arrival.\nif (jitter > 150) { flag('Resident Proxy Network Profile'); }", 
+            insight: "Residential proxies have high network jitter compared to direct links.", weight: 25 
+        },
+        masking_ip: { 
+            red: "// RED TEAM: Wrap traffic in a Resident Proxy pool.\n// Route through an intermediary hop to hide the Leaked IP.", 
+            blue: "// BLUE TEAM: Analyze RTT & Hop Count.\n// Measures latency; multiple proxy hops create a distinctive lag signature.\nif (roundTripTime > 200 || hops > 15) {\n  flag('Active Masking IP: Anomalous Network Latency');\n}", 
+            insight: "Masking IPs introduce latency signatures not found in direct connections.", weight: 20 
+        },
+        nameserver_ip: { 
+            red: "// RED TEAM: Use a global DNS (8.8.8.8).\n// Failure to match DNS location to the Socket IP location.", 
+            blue: "// BLUE TEAM: Geo-Distance Audit.\n// Checks if the DNS resolver is geographically close to the user's IP.\nif (distance(SocketIP, NameserverIP) > 500) {\n  flag('Nameserver IP / Socket IP Location Mismatch');\n}", 
+            insight: "Mismatch between your IP and DNS server location reveals a proxy.", weight: 15 
         },
         ttl: { 
             red: "// RED TEAM: Set OS-specific TCP/IP stack signals (TTL 64).\n// Matches the TTL to the claimed OS (e.g., Mac/Linux).", 
-            blue: "// BLUE TEAM: Inspect stack signals.\n// If User-Agent is Windows but TTL is 64 (Linux), it's a conflict.\nif (ua.includes('Win') && tcpTTL === 64) { flag('OS-Stack Conflict'); }", 
-            insight: "TCP TTL is OS-specific; mismatch reveals a 'Frankenstein' device.", 
-            weight: 20 
+            blue: "// BLUE TEAM: Inspect stack signals.\n// If User-Agent is Windows but TTL is 64 (Linux), the identity is conflicted.\nif (ua.includes('Win') && tcpTTL === 64) { flag('OS-Stack Identity Conflict'); }", 
+            insight: "TCP TTL values are OS-specific; mismatch reveals custom packet forgeries.", weight: 20 
+        },
+        ice_leak: { 
+            red: "// RED TEAM: Mask leak by stripping candidates.\n// Strips private IPs from WebRTC to hide the real local origin.", 
+            blue: "// BLUE TEAM: Force out-of-band STUN query.\n// Forces a STUN request to reveal the real local IP behind a tunnel.\nif (e.candidate.includes('typ host')) { flag('VPN Bypass: Local IP Leaked'); }", 
+            insight: "Checks if the browser is revealing internal network info behind a VPN.", weight: 45 
+        },
+        motion: {
+            red: "// RED TEAM: Inject static accelerometer data.\n// Attempts to hide the fact that there is no physical motion by spoofing Earth gravity.\nwindow.DeviceMotionEvent = { acceleration: {x: 0, y: 0, z: 9.8} };",
+            blue: "// BLUE TEAM: Entropy & Quantization Audit.\n// Real sensors have tiny tremors. If motion is mathematically perfect,\n// or has zero variance over 5 seconds, it's a software inject.\nif (variance(sensorData) < 0.0001) flag('Motion Stasis Detected');",
+            insight: "Human hands are never perfectly still; zero noise is a bot signature.", weight: 45
+        },
+        thermal: {
+            red: "// RED TEAM: No direct spoof available for silicon heat.\n// Instead, Red Team tries to optimize JS execution to avoid lag and thermal detection.",
+            blue: "// BLUE TEAM: Silicon Thermal Decay Audit.\n// Runs a heavy SHA-256 loop. On real mobile ARM chips, performance drops\n// as the device heats up. Servers in data centers do not throttle this way.\nif (performanceDelta < threshold) flag('Zero Thermal Throttling Detected');",
+            insight: "Mobile CPUs throttle when hot; servers in data centers stay cold.", weight: 35
+        },
+        mag: {
+            red: "// RED TEAM: Block Magnetometer access or return zeroed field.\n// Attempts to hide the device's location by freezing magnetic field reporting.\nObject.defineProperty(window, 'Magnetometer', { value: null });",
+            blue: "// BLUE TEAM: Interference Consistency Check.\n// Real phones always detect earth's magnetic field shifts.\n// A field that never changes while the 'phone' moves is an emulation leak.\nif (magneticField === 0 || fieldIsStatic) flag('Zero-Interference Simulation');",
+            insight: "Real phones detect earth's magnetic field; emulators remain static.", weight: 30
+        },
+        touch: {
+            red: "// RED TEAM: Simulate touch events with perfect coordinates.\n// Injects automated clicks that lack the physical radius of a human finger.\ndispatchEvent(new TouchEvent('touchstart', { touches: [{clientX: 100, clientY: 200}] }));",
+            blue: "// BLUE TEAM: Touch Geometry Audit.\n// Real fingers create 'Touch Patches' (ovals). If the radiusX/radiusY is \n// exactly 1.0 or 0, it's a mouse-click pretending to be a finger.\nif (touch.radiusX <= 1) flag('Synthetic Touch Geometry');",
+            insight: "Fingers create oval patches; scripts create 1x1 pixel points.", weight: 40
+        },
+        cpu: { 
+            red: "// RED TEAM: Overwrite hardware count.\n// Modifies the navigator property to claim a high-performance CPU count.\nObject.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });", 
+            blue: "// BLUE TEAM: Measure compute delta.\n// Runs a small math benchmark. If an '8-core' CPU takes as long as a 2-core CPU, it's a spoof.\nif (benchmarkTime > TARGET_8CORE_MS) {\n  flag('Perf-to-Core Ratio Anomaly');\n}", 
+            insight: "If an '8-core' CPU performs like a 2-core chip, the count is fake.", weight: 15 
+        },
+        ram: { 
+            red: "// RED TEAM: Mask memory to 16GB.\n// Overwrites the deviceMemory API to suggest the machine has high-end RAM.\nObject.defineProperty(navigator, 'deviceMemory', { get: () => 16 });", 
+            blue: "// BLUE TEAM: Check hardware pairing logic.\n// Flags impossible hardware (e.g., 16GB RAM on a device with 1 CPU core).\nif (ram >= 16 && cores <= 2) {\n  flag('Impossible Hardware Profile');\n}", 
+            insight: "High RAM on a single-core machine is a signature of bot farms.", weight: 15 
+        },
+        gpu: { 
+            red: "// RED TEAM: Change reported GPU vendor.\n// Manually sets the WebGL renderer string to a high-end card like an NVIDIA 4090.\ngl.getParameter(RENDERER) = 'NVIDIA 4090';", 
+            blue: "// BLUE TEAM: Compare vendor vs renderer logic.\n// Detects 'SwiftShader' (software emulator) hiding behind a high-end name.\nif (vendor === 'NVIDIA' && renderer === 'SwiftShader') {\n  flag('Software Renderer Leak');\n}", 
+            insight: "Software renderers reveal they are not real physical GPUs.", weight: 20 
+        },
+        ext: { 
+            red: "// RED TEAM: Report advanced GPU capabilities.\n// Claims support for advanced features to look more 'legitimate.'\ngl.getSupportedExtensions().push('WEBGL_draw_buffers');", 
+            blue: "// BLUE TEAM: Verify functional extension support.\n// Tries to use the extension. If it fails while 'supported', it's a lie.\nif (extSupported && !canActuallyDrawToBuffers()) {\n  flag('GPU Capability Mismatch');\n}", 
+            insight: "Checks if the GPU can actually perform functions it claims to support.", weight: 15 
+        },
+        canvas: { 
+            red: "// RED TEAM: Inject pixel-level noise.\n// Injects slight random noise into pixel data to prevent unique fingerprinting.\nctx.getImageData = () => { /* Noise injection */ };", 
+            blue: "// BLUE TEAM: Analyze global entropy.\n// If the pixel hash is 100% unique globally, it is statistically noise.\nif (isUniqueInGlobalPool(hash)) {\n  flag('Artificially Poisoned Canvas');\n}", 
+            insight: "100% unique canvas hashes are a mathematical sign of scripts.", weight: 35 
         },
         bat: { 
             red: "// RED TEAM: Fix battery level.\n// Overwrites Battery API to show a static, healthy charge.\nnavigator.getBattery = () => Promise.resolve({ level: 0.85 });", 
             blue: "// BLUE TEAM: Audit discharge drift.\n// Real hardware shows active discharge; static levels are spoofs.\nif (dischargeDelta === 0) { flag('Static Battery Signature'); }", 
-            insight: "Real hardware always shows active discharge; static levels are spoofs.", 
-            weight: 10 
-        },
-        font: { 
-            red: "// RED TEAM: Report only generic system fonts.\n// Blocks font listing to reduce fingerprint uniqueness.", 
-            blue: "// BLUE TEAM: Check font list entropy.\n// Reporting < 5 fonts is a sign of a 'hardened' bot environment.\nif (fonts.length < 5) { flag('Sanitization Detected'); }", 
-            insight: "Reporting too few fonts is suspicious; it signals a hardened environment.", 
-            weight: 10 
+            insight: "Real devices show micro-fluctuations in battery percentage.", weight: 10 
         },
         audio: { 
-            red: "// RED TEAM: Add jitter to audio sample rate.\n// Injects noise into AudioContext to prevent hardware fingerprinting.", 
-            blue: "// BLUE TEAM: Audit noise floor stasis.\n// Artificial jitter contradicts precision of real hardware rates.\nif (audioCtx.sampleRate !== hardwareExpected) { flag('Audio Profile Error'); }", 
-            insight: "Artificial jitter contradicts the precision of real hardware sample rates.", 
-            weight: 20 
+            red: "// RED TEAM: Add jitter to audio sample rate.\n// Injects noise into the AudioContext to prevent hardware fingerprinting.", 
+            blue: "// BLUE TEAM: Audit noise floor stasis.\n// Artificial jitter contradicts the precision of real hardware rates.\nif (audioCtx.sampleRate !== hardwareExpected) { flag('Impossible Audio Profile'); }", 
+            insight: "Spoofed audio noise often contradicts the hardware sample rate.", weight: 20 
         },
-        agent: { 
-            red: "// RED TEAM: Change UA to high-value device.\n// Swaps User-Agent to claim a premium device (e.g., iPhone).", 
-            blue: "// BLUE TEAM: Cross-check Platform ID.\n// Cross-checks UA against navigator.platform (e.g., iPhone on Win32).\nif (ua.includes('iPhone') && platform === 'Win32') { flag('UA/Platform Mismatch'); }", 
-            insight: "Flags when UA conflicts with low-level kernel architecture.", 
-            weight: 25 
-        },
-        shadow: { 
-            red: "// RED TEAM: Use descriptors to hide property changes.\n// Uses object descriptors to try and hide changes to native properties.", 
-            blue: "// BLUE TEAM: Attempt property deletion.\n// Native properties cannot be deleted. If 'delete' returns true, it's a spoof.\nif (delete navigator.languages === true) { flag('Shadowed Property'); }", 
-            insight: "Native properties are non-configurable; deletability implies shadowing.", 
-            weight: 30 
-        },
-        orient: { 
-            red: "// RED TEAM: Force landscape to match desktop spoof.\n// Locks orientation to match the fake desktop resolution.", 
-            blue: "// BLUE TEAM: Compare Aspect Ratio vs Orient.\n// Portrait resolution claiming landscape is a logical error.\nif (height > width && orientation === 'landscape') { flag('Orientation Conflict'); }", 
-            insight: "Portrait resolution claiming landscape is a logic error.", 
-            weight: 15 
-        },
-        proxy_trap: { 
-            red: "// RED TEAM: Proxy wrap the Navigator object.\n// Uses a JS 'Proxy' to intercept all device-info requests.", 
-            blue: "// BLUE TEAM: Detect Proxy via error stack.\n// Triggers an error; JS Proxies produce unique engine error traces.\ntry { nav.plugins.args; } catch (e) { if (e.message.includes('Proxy')) flag(); }", 
-            insight: "JS Proxies throw unique engine errors on non-existent properties.", 
-            weight: 40 
-        },
-        font_bbox: { 
-            red: "// RED TEAM: Report custom fonts as present.\n// Lies about installed fonts to look like a standard user.", 
-            blue: "// BLUE TEAM: Measure bounding box width.\n// If 'Comic Sans' width matches 'Arial', the font was spoofed.\nif (w === arialW && name !== 'Arial') { flag('Font Masking Detected'); }", 
-            insight: "Pixel width matching Arial while claiming another font is a fallback.", 
-            weight: 35 
-        },
-        ice_leak: { 
-            red: "// RED TEAM: Mask leak by stripping candidates.\n// Strips private IPs from WebRTC to hide the real local origin.", 
-            blue: "// BLUE TEAM: Force out-of-band STUN query.\n// Forces STUN; if a 192.168.x.x IP appears, the VPN is leaking.\nif (e.candidate.includes('typ host')) { flag('VPN Bypass Leak'); }", 
-            insight: "Forces a STUN request to reveal the real local IP behind a tunnel.", 
-            weight: 45 
+        font: { 
+            red: "// RED TEAM: Report only generic system fonts.\n// Blocks the browser from listing all system fonts to reduce the 'fingerprint' uniqueness.\n// Report only [Arial, Courier, Serif].", 
+            blue: "// BLUE TEAM: Check font list entropy.\n// Real browsers usually have dozens of fonts. Having only 3 is a sign of a 'hardened' bot.\nif (fonts.length < 5) { flag('Environment Sanitization Detected'); }", 
+            insight: "Reporting too few fonts is suspicious; it signals a hardened environment.", weight: 10 
         },
         mobile_emu: { 
-            red: "// RED TEAM: Emulate iPhone on high-end server.\n// Runs mobile emulator on a server to simulate a phone user.", 
-            blue: "// BLUE TEAM: Audit sensor stasis.\n// Real phones have 'micro-wobble' noise; emulators are perfectly still.\nif (platform === 'iPhone' && accel === 0) { flag('Sensor Stasis'); }", 
-            insight: "Emulators lack real sensor noise and leak server-level core counts.", 
-            weight: 50 
+            red: "// RED TEAM: Emulate iPhone on high-end server.\n// Runs mobile emulator on a server to simulate a real phone user.", 
+            blue: "// BLUE TEAM: Audit sensor stasis.\n// Real phones have 'micro-wobble' noise; emulators are perfectly still.\nif (platform === 'iPhone' && accel === 0) { flag('Sensor Stasis: Synthetic Env'); }", 
+            insight: "Detects headless browsers claiming to be physical mobile devices.", weight: 50 
+        },
+        proxy_trap: { 
+            red: "// RED TEAM: Proxy wrap the Navigator object.\n// Uses a JS 'Proxy' to intercept all device-info requests to keep spoofs hidden.\nconst nav = new Proxy(navigator, handler);", 
+            blue: "// BLUE TEAM: Detect Proxy via error stack.\n// Triggers an error; JS Proxies throw unique engine error traces.\ntry { nav.plugins.args; } catch (e) { if (e.message.includes('Proxy')) flag(); }", 
+            insight: "JS Proxies throw unique engine errors that reveal they are 'trapping'.", weight: 40 
+        },
+        api: { 
+            red: "// RED TEAM: Mask the interception layer.\n// Attempts to hide that native functions have been overwritten by faking the 'toString' output.\nsetTimeout.toString = () => 'function setTimeout() { [native code] }';", 
+            blue: "// BLUE TEAM: Audit via prototype call.\n// Uses Function Prototype to get the true identity, bypassing fake strings.\nif (!Function.prototype.toString.call(fn).includes('[native code]')) {\n  flag('Hooked Native Function');\n}", 
+            insight: "Checks if native browser functions have been replaced by scripts.", weight: 25 
+        },
+        shadow: { 
+            red: "// RED TEAM: Use descriptors to hide property changes.\n// Uses object descriptors to try and hide changes to native properties from simple detection.", 
+            blue: "// BLUE TEAM: Attempt property deletion.\n// Native properties cannot be deleted. If 'delete' returns true, it's a spoof.\nif (delete navigator.languages === true) { flag('Shadowed Property Detected'); }", 
+            insight: "Native properties can't be deleted; if they are, they're fakes.", weight: 30 
+        },
+        view: { 
+            red: "// RED TEAM: Force desktop resolution.\n// window.innerWidth = 1920; screen.width = 1920;", 
+            blue: "// BLUE TEAM: Check coordinate sanity.\n// Physical check: content area cannot be larger than the window frame.\nif (window.outerWidth < window.innerWidth) {\n  flag('Coordinate Consistency Failure');\n}", 
+            insight: "Content cannot be physically wider than the browser window.", weight: 30 
+        },
+        orient: { 
+            red: "// RED TEAM: Force landscape to match desktop spoof.\n// Locks orientation to landscape despite the actual aspect ratio of the window.\nscreen.orientation.lock('landscape');", 
+            blue: "// BLUE TEAM: Compare Aspect Ratio vs Orient.\n// Portrait resolution claiming landscape is a logical error.\nif (height > width && orientation === 'landscape') { flag('Orientation Logic Conflict'); }", 
+            insight: "Portrait resolution claiming landscape is a logic error.", weight: 15 
+        },
+        tz: { 
+            red: "// RED TEAM: Match proxy timezone.\n// Spoofs JS TimeZone object to match the proxy location instead of system clock.\nIntl.DateTimeFormat = () => ({ timeZone: 'Chicago' });", 
+            blue: "// BLUE TEAM: Check clock skew vs offset.\n// Compares spoofed name against actual system clock offset.\nif (new Date().getTimezoneOffset() !== chicagoOffset) {\n  flag('Temporal Offset Mismatch');\n}", 
+            insight: "The system clock often leaks the real location despite the TZ.", weight: 15 
+        },
+        agent: { 
+            red: "// RED TEAM: Change UA to high-value device.\n// Swaps User-Agent to claim a premium device like a specific iPhone model.\nnavigator.userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0...';", 
+            blue: "// BLUE TEAM: Cross-check Platform ID.\n// Cross-checks UA against navigator.platform (e.g., iPhone claiming to be on Win32).\nif (ua.includes('iPhone') && platform === 'Win32') { flag('UA vs Platform Mismatch'); }", 
+            insight: "Detects when the User-Agent contradicts the CPU architecture.", weight: 25 
+        },
+        font_bbox: { 
+            red: "// RED TEAM: Report custom fonts as present.\n// Lies about installed fonts to look like a standard user with high-end font libraries.", 
+            blue: "// BLUE TEAM: Measure bounding box width.\n// If 'Comic Sans' width matches 'Arial', the font was spoofed and fallback was triggered.\nif (w === arialW && name !== 'Arial') { flag('Font Masking Detected'); }", 
+            insight: "If 'Impact' width matches 'Arial', the font is actually missing.", weight: 35 
         }
     };
 
@@ -323,17 +288,14 @@
     let isStressTesting = false;
 
     function toggleTool(tool) {
-        if (isStressTesting) return; 
+        if (isStressTesting || !fullStack[tool]) return; 
         const btn = document.getElementById(`btn-${tool}`);
         const isAdding = !activeTools.has(tool);
-
         if (isAdding) {
-            activeTools.add(tool);
-            btn.classList.add('tool-active');
-            logEvent(`ALERT: Injection [${tool.toUpperCase()}] successfully hooked.`, true);
+            activeTools.add(tool); btn.classList.add('tool-active');
+            logEvent(`ALERT: Injection [${tool.toUpperCase()}] hooked.`, true);
         } else {
-            activeTools.delete(tool);
-            btn.classList.remove('tool-active');
+            activeTools.delete(tool); btn.classList.remove('tool-active');
             logEvent(`CLEARED: Trace for [${tool.toUpperCase()}] purged.`);
         }
         updateAudit(tool);
@@ -341,62 +303,51 @@
 
     function logEvent(msg, isAlert = false) {
         const feed = document.getElementById('console-feed');
-        const ts = new Date().toLocaleTimeString([], { hour12: false });
         const entry = document.createElement('div');
         entry.className = 'console-entry' + (isAlert ? ' console-alert' : '');
-        entry.innerHTML = `<span class="console-ts">[${ts}]</span> ${msg}`;
-        feed.appendChild(entry);
-        feed.scrollTop = feed.scrollHeight; 
+        entry.innerHTML = `<span style="color:#555;">[${new Date().toLocaleTimeString([],{hour12:false})}]</span> ${msg}`;
+        feed.appendChild(entry); feed.scrollTop = feed.scrollHeight; 
     }
 
     function updateAudit(lastTool) {
         let totalWeight = 0;
-        activeTools.forEach(t => totalWeight += fullStack[t].weight);
-
+        activeTools.forEach(t => { if(fullStack[t]) totalWeight += fullStack[t].weight; });
         const score = Math.min(totalWeight, 100);
         document.getElementById('risk-value').innerText = score + "%";
+        const v = document.getElementById('verdict');
+        const rb = document.getElementById('risk-box');
+        if (score === 0) { v.innerText = "CLEAN BASELINE"; rb.style.borderColor = "var(--blue-team)"; rb.style.background = "#000d1a"; }
+        else if (score < 50) { v.innerText = "SUSPICIOUS ACTIVITY"; rb.style.borderColor = "var(--warning-orange)"; rb.style.background = "#1a0d00"; }
+        else { v.innerText = "FRANKENSTEIN DEVICE DETECTED"; rb.style.borderColor = "var(--hot-pink)"; rb.style.background = "#1a0005"; }
         
-        const verdict = document.getElementById('verdict');
-        const riskBox = document.getElementById('risk-box');
-        
-        if (score === 0) {
-            verdict.innerText = "CLEAN BASELINE";
-            riskBox.style.borderColor = "var(--blue-team)";
-            riskBox.style.background = "#000d1a";
-        } else if (score < 50) {
-            verdict.innerText = "SUSPICIOUS ACTIVITY";
-            riskBox.style.borderColor = "var(--warning-orange)";
-            riskBox.style.background = "#1a0d00";
-        } else {
-            verdict.innerText = "FRANKENSTEIN DEVICE DETECTED";
-            riskBox.style.borderColor = "var(--hot-pink)";
-            riskBox.style.background = "#1a0005";
-        }
-
         if (lastTool && fullStack[lastTool]) {
-            document.getElementById('red-display').innerText = fullStack[lastTool].red;
-            document.getElementById('blue-display').innerText = fullStack[lastTool].blue;
+            const redBox = document.getElementById('red-display');
+            const blueBox = document.getElementById('blue-display');
+            redBox.innerText = fullStack[lastTool].red;
+            blueBox.innerText = fullStack[lastTool].blue;
             document.getElementById('forensic-insight').innerText = fullStack[lastTool].insight;
+            redBox.scrollTop = 0;
+            blueBox.scrollTop = 0;
         }
     }
 
     async function startStressTest() {
         if (isStressTesting) return;
-        isStressTesting = true;
-        resetAudit();
+        isStressTesting = true; resetAudit();
         logEvent("WARNING: INITIATING FULL SYSTEM STRESS TEST...", true);
         
         const tools = Object.keys(fullStack);
         for (const tool of tools) {
-            await new Promise(r => setTimeout(r, 200)); 
+            await new Promise(r => setTimeout(r, 250)); 
             const btn = document.getElementById(`btn-${tool}`);
-            activeTools.add(tool);
-            btn.classList.add('tool-active');
-            logEvent(`CRITICAL: External spoof detected at point [${tool}]`, true);
-            updateAudit(tool);
+            if (btn) { 
+                activeTools.add(tool); 
+                btn.classList.add('tool-active'); 
+                updateAudit(tool); 
+                logEvent(`CRITICAL: Spoof detected [${tool.toUpperCase()}]`, true);
+            }
         }
-        
-        logEvent("STRESS TEST COMPLETE: 100% ANOMALY DENSITY REACHED.", true);
+        logEvent("STRESS TEST COMPLETE: 100% ANOMALY DENSITY.", true);
         isStressTesting = false;
     }
 
