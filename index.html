@@ -10,6 +10,7 @@
             --blue-team: #00d4ff;
             --maroon-dark: #1a000d;
             --bg-black: #0a0a0a;
+            --warning-orange: #ffae00;
         }
 
         body {
@@ -20,12 +21,14 @@
         }
 
         #game-container {
-            max-width: 1500px;
+            max-width: 1600px;
             margin: auto;
             display: grid;
-            grid-template-columns: 1.4fr 1fr;
+            grid-template-columns: 1.5fr 1fr;
             gap: 20px;
         }
+
+        @media (max-width: 1200px) { #game-container { grid-template-columns: 1fr; } }
 
         #hacker-side {
             background: var(--maroon-dark);
@@ -35,126 +38,105 @@
             box-shadow: 0 0 15px rgba(255, 0, 127, 0.2);
         }
 
-        .tool-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 15px; }
-
-        /* Unified Button Style: Hot Pink Outline with White Text */
-        .tool-btn {
-            background: #222; 
-            color: white; 
-            border: 1px solid var(--hot-pink);
-            padding: 8px; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            font-size: 0.62em;
-            font-weight: bold; 
-            transition: 0.2s; 
-            text-transform: uppercase;
-            white-space: nowrap; 
-            overflow: hidden;
-        }
-
-        .tool-btn:hover {
-            background: #333;
-            box-shadow: 0 0 8px rgba(255, 0, 127, 0.4);
-        }
-
-        .tool-active { 
-            background: var(--hot-pink) !important; 
-            box-shadow: 0 0 15px var(--hot-pink); 
-            color: white !important; 
-        }
-
-        .code-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; }
+        .tool-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
         
+        .category-label { 
+            grid-column: span 4; font-size: 0.65em; color: #888; 
+            margin-top: 15px; border-bottom: 1px solid #444; padding-bottom: 3px;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        .tool-btn {
+            background: #222; color: white; border: 1px solid var(--hot-pink);
+            padding: 8px; border-radius: 4px; cursor: pointer; 
+            font-size: 0.62em; font-weight: bold; transition: 0.2s; 
+            text-transform: uppercase; white-space: nowrap; overflow: hidden;
+        }
+
+        .tool-btn:hover { background: #333; box-shadow: 0 0 8px rgba(255, 0, 127, 0.4); }
+        .tool-active { background: var(--hot-pink) !important; box-shadow: 0 0 15px var(--hot-pink); }
+
+        .code-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .code-box {
             background: #000; border: 1px solid #333; padding: 12px;
-            border-radius: 4px; min-height: 400px; font-size: 0.72em;
-            overflow-y: auto;
+            border-radius: 4px; min-height: 480px; font-size: 0.72em;
+            overflow-y: auto; font-family: 'Courier New', monospace;
         }
-
-        .red-code { color: #00ff00; font-family: 'Courier New', monospace; white-space: pre-wrap; }
-        .blue-logic { color: var(--blue-team); font-family: 'Courier New', monospace; white-space: pre-wrap; }
 
         #audit-side {
             background: #000; border: 2px solid var(--blue-team);
-            border-radius: 12px; padding: 20px;
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+            border-radius: 12px; padding: 20px; position: sticky; top: 20px; height: fit-content;
         }
 
-        #risk-box { text-align:center; padding: 15px; border: 1px dashed var(--blue-team); background: #000d1a; }
-        #risk-value { font-size: 3.2em; font-weight: 900; color: var(--blue-team); }
+        #risk-box { text-align:center; padding: 15px; border: 1px dashed var(--blue-team); background: #000d1a; transition: 0.5s; }
+        #risk-value { font-size: 3.5em; font-weight: 900; color: var(--blue-team); }
         
-        .audit-summary { margin-top: 20px; font-size: 0.85em; line-height: 1.6; }
-        .section-label { font-size: 0.65em; font-weight: bold; margin-bottom: 5px; display: block; }
+        .threat-list { color: var(--warning-orange); font-size: 0.8em; margin-top: 10px; max-height: 150px; overflow-y: auto; font-family: monospace; }
+        .reset-btn { margin-top: 15px; background: transparent; color: #555; border: 1px solid #333; cursor: pointer; padding: 5px 10px; font-size: 0.7em; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
     <div id="hacker-side">
-        <h2 style="color: var(--hot-pink); margin:0 0 10px 0;">Red Team: Injection Console (IP AUDIT FOCUS)</h2>
+        <h2 style="color: var(--hot-pink); margin:0 0 15px 0;">Red Team: Full Injection Stack (Restored Comments)</h2>
         
         <div class="tool-grid">
-            <button class="tool-btn" id="btn-socket_ip" onclick="showPair('socket_ip')">Socket IP</button>
-            <button class="tool-btn" id="btn-leaked_ip" onclick="showPair('leaked_ip')">Leaked IP</button>
-            <button class="tool-btn" id="btn-masking_ip" onclick="showPair('masking_ip')">Masking IP</button>
-            <button class="tool-btn" id="btn-nameserver_ip" onclick="showPair('nameserver_ip')">Nameserver IP</button>
+            <div class="category-label">IP & Network Forensics</div>
+            <button class="tool-btn" onclick="toggleTool('socket_ip', 15)">Socket IP</button>
+            <button class="tool-btn" onclick="toggleTool('leaked_ip', 40)">Leaked IP</button>
+            <button class="tool-btn" onclick="toggleTool('masking_ip', 20)">Masking IP</button>
+            <button class="tool-btn" onclick="toggleTool('nameserver_ip', 15)">Nameserver IP</button>
+            <button class="tool-btn" onclick="toggleTool('proxy', 25)">Resident Proxy</button>
+            <button class="tool-btn" onclick="toggleTool('ttl', 20)">TCP TTL</button>
+            <button class="tool-btn" onclick="toggleTool('ice_leak', 45)">ICE Leak Audit</button>
+            <button class="tool-btn" onclick="toggleTool('proxy_trap', 40)">Proxy Trap</button>
 
-            <button class="tool-btn" id="btn-cpu" onclick="showPair('cpu')">Spoof 8-Core CPU</button>
-            <button class="tool-btn" id="btn-ram" onclick="showPair('ram')">Mask Device Memory</button>
-            <button class="tool-btn" id="btn-api" onclick="showPair('api')">Mask Native Hooks</button>
-            <button class="tool-btn" id="btn-view" onclick="showPair('view')">Virtual Viewport</button>
-            
-            <button class="tool-btn" id="btn-gpu" onclick="showPair('gpu')">WebGL GPU Mask</button>
-            <button class="tool-btn" id="btn-ext" onclick="showPair('ext')">Spoof GPU Ext</button>
-            <button class="tool-btn" id="btn-canvas" onclick="showPair('canvas')">Poison Canvas Hash</button>
-            <button class="tool-btn" id="btn-tz" onclick="showPair('tz')">Fix TZ Drift</button>
-            
-            <button class="tool-btn" id="btn-proxy" onclick="showPair('proxy')">Resident Proxy</button>
-            <button class="tool-btn" id="btn-ttl" onclick="showPair('ttl')">Mask TCP TTL</button>
-            <button class="tool-btn" id="btn-bat" onclick="showPair('bat')">Battery Fuzzer</button>
-            <button class="tool-btn" id="btn-font" onclick="showPair('font')">Standard Font List</button>
-            
-            <button class="tool-btn" id="btn-audio" onclick="showPair('audio')">Audio Noise Gen</button>
-            <button class="tool-btn" id="btn-agent" onclick="showPair('agent')">User-Agent Spoofer</button>
-            <button class="tool-btn" id="btn-shadow" onclick="showPair('shadow')">Shadow Nav Props</button>
-            <button class="tool-btn" id="btn-orient" onclick="showPair('orient')">Force Landscape</button>
+            <div class="category-label">Hardware Profile Spoofing</div>
+            <button class="tool-btn" onclick="toggleTool('cpu', 15)">Spoof CPU</button>
+            <button class="tool-btn" onclick="toggleTool('ram', 15)">Mask RAM</button>
+            <button class="tool-btn" onclick="toggleTool('gpu', 20)">WebGL GPU</button>
+            <button class="tool-btn" onclick="toggleTool('ext', 15)">GPU Ext</button>
+            <button class="tool-btn" onclick="toggleTool('bat', 10)">Battery Fuzzer</button>
+            <button class="tool-btn" onclick="toggleTool('audio', 20)">Audio Noise</button>
+            <button class="tool-btn" onclick="toggleTool('canvas', 35)">Poison Canvas</button>
+            <button class="tool-btn" onclick="toggleTool('mobile_emu', 50)">Mobile Emu</button>
 
-            <button class="tool-btn" id="btn-proxy_trap" onclick="showPair('proxy_trap')">Advanced Proxy Trap</button>
-            <button class="tool-btn" id="btn-font_bbox" onclick="showPair('font_bbox')">Font B-Box Audit</button>
-            <button class="tool-btn" id="btn-ice_leak" onclick="showPair('ice_leak')">ICE Candidate Audit</button>
-            <button class="tool-btn" id="btn-mobile_emu" onclick="showPair('mobile_emu')">Mobile Emulator Audit</button>
+            <div class="category-label">Environment Sanitization</div>
+            <button class="tool-btn" onclick="toggleTool('api', 25)">Native Hooks</button>
+            <button class="tool-btn" onclick="toggleTool('view', 30)">Virtual View</button>
+            <button class="tool-btn" onclick="toggleTool('tz', 15)">Fix TZ Drift</button>
+            <button class="tool-btn" onclick="toggleTool('font', 10)">Font List</button>
+            <button class="tool-btn" onclick="toggleTool('agent', 25)">User-Agent</button>
+            <button class="tool-btn" onclick="toggleTool('shadow', 30)">Shadow Props</button>
+            <button class="tool-btn" onclick="toggleTool('orient', 15)">Orientation</button>
+            <button class="tool-btn" onclick="toggleTool('font_bbox', 35)">Font B-Box</button>
         </div>
 
         <div class="code-container">
-            <div>
-                <span class="section-label" style="color:var(--hot-pink)">RED TEAM INJECTION</span>
-                <div class="code-box red-code" id="red-display">// Select a tool...</div>
-            </div>
-            <div>
-                <span class="section-label" style="color:var(--blue-team)">FORENSIC TEAM LOGIC</span>
-                <div class="code-box blue-logic" id="blue-display">// Analysis target...</div>
-            </div>
+            <div><div class="code-box" id="red-display" style="color:#00ff00;">// Red Team Injection...</div></div>
+            <div><div class="code-box" id="blue-display" style="color:var(--blue-team);">// Forensic Logic...</div></div>
         </div>
     </div>
 
     <div id="audit-side">
-        <h2 style="color: var(--blue-team); margin:0 0 10px 0;">Forensic Audit Engine (FOR CHECK)</h2>
+        <h2 style="color: var(--blue-team); margin:0 0 10px 0;">Forensic Audit Engine</h2>
         <div id="risk-box">
             <small>ANOMALY RISK SCORE</small>
             <div id="risk-value">0%</div>
-            <div id="verdict" style="font-weight:bold;">CLEAN BASELINE</div>
+            <div id="verdict">CLEAN BASELINE</div>
         </div>
         
-        <div class="audit-summary">
-            <strong>Forensic Investigator Insights:</strong><br>
-            <span id="forensic-insight">Analyze how we deconstruct "Frankenstein" devices by identifying logical gaps between reported and physical behaviors.</span>
+        <div class="threat-list" id="threat-list">No anomalies detected.</div>
+        <div class="audit-summary" style="border-top: 1px solid #333; padding-top:15px; margin-top:15px;">
+            <strong>Investigator Insight:</strong><br>
+            <span id="forensic-insight" style="font-style:italic;">Analyze how we deconstruct "Frankenstein" devices.</span>
         </div>
+        <button class="reset-btn" onclick="resetAudit()">RESET ENVIRONMENT</button>
     </div>
 </div>
 
 <script>
-    // Logic remains identical to previous version, ensuring all forensic variables are present
     const fullStack = {
         socket_ip: {
             red: "// RED TEAM: Spoof the 'Claimed' identity.\nheaders['X-Forwarded-For'] = '72.14.201.24';\n// Injecting a trusted residential IP into the packet header.",
@@ -278,18 +260,66 @@
         }
     };
 
-    function showPair(tool) {
+    let activeTools = new Set();
+    const weights = { 
+        socket_ip: 15, leaked_ip: 40, masking_ip: 20, nameserver_ip: 15, proxy: 25, ttl: 20, ice_leak: 45, proxy_trap: 40,
+        cpu: 15, ram: 15, gpu: 20, ext: 15, bat: 10, audio: 20, canvas: 35, mobile_emu: 50,
+        api: 25, view: 30, tz: 15, font: 10, agent: 25, shadow: 30, orient: 15, font_bbox: 35
+    };
+
+    function toggleTool(tool) {
+        const btn = event.target;
+        if (activeTools.has(tool)) {
+            activeTools.delete(tool);
+            btn.classList.remove('tool-active');
+        } else {
+            activeTools.add(tool);
+            btn.classList.add('tool-active');
+        }
+        updateAudit(tool);
+    }
+
+    function updateAudit(lastTool) {
+        let totalWeight = 0;
+        const list = document.getElementById('threat-list');
+        list.innerHTML = "";
+        
+        activeTools.forEach(t => {
+            totalWeight += weights[t];
+            list.innerHTML += `<div style="margin-bottom:2px;">[!] FLAG: ${t.toUpperCase().replace('_', ' ')}</div>`;
+        });
+
+        const score = Math.min(totalWeight, 100);
+        document.getElementById('risk-value').innerText = score + "%";
+        
+        const verdict = document.getElementById('verdict');
+        const riskBox = document.getElementById('risk-box');
+        
+        if (score === 0) {
+            verdict.innerText = "CLEAN BASELINE";
+            riskBox.style.borderColor = "var(--blue-team)";
+            list.innerText = "No anomalies detected.";
+        } else if (score < 50) {
+            verdict.innerText = "SUSPICIOUS ACTIVITY";
+            riskBox.style.borderColor = "var(--warning-orange)";
+        } else {
+            verdict.innerText = "FRANKENSTEIN DEVICE DETECTED";
+            riskBox.style.borderColor = "var(--hot-pink)";
+        }
+
+        if (lastTool && activeTools.has(lastTool)) {
+            document.getElementById('red-display').innerText = fullStack[lastTool].red;
+            document.getElementById('blue-display').innerText = fullStack[lastTool].blue;
+            document.getElementById('forensic-insight').innerText = fullStack[lastTool].insight;
+        }
+    }
+
+    function resetAudit() {
+        activeTools.clear();
         document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('tool-active'));
-        const btn = document.getElementById(`btn-${tool}`);
-        if (btn) btn.classList.add('tool-active');
-        
-        document.getElementById('red-display').innerText = fullStack[tool].red;
-        document.getElementById('blue-display').innerText = fullStack[tool].blue;
-        document.getElementById('forensic-insight').innerText = fullStack[tool].insight;
-        
-        const risk = Math.floor(Math.random() * 25 + 75);
-        document.getElementById('risk-value').innerText = risk + "%";
-        document.getElementById('verdict').innerText = "FRANKENSTEIN DEVICE DETECTED";
+        document.getElementById('red-display').innerText = "// Red Team Injection...";
+        document.getElementById('blue-display').innerText = "// Forensic Logic...";
+        updateAudit();
     }
 </script>
 </body>
