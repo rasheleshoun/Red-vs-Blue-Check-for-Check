@@ -37,14 +37,32 @@
 
         .tool-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 15px; }
 
+        /* Unified Button Style: Hot Pink Outline with White Text */
         .tool-btn {
-            background: #222; color: white; border: 1px solid var(--hot-pink);
-            padding: 8px; border-radius: 4px; cursor: pointer; font-size: 0.62em;
-            font-weight: bold; transition: 0.2s; text-transform: uppercase;
-            white-space: nowrap; overflow: hidden;
+            background: #222; 
+            color: white; 
+            border: 1px solid var(--hot-pink);
+            padding: 8px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 0.62em;
+            font-weight: bold; 
+            transition: 0.2s; 
+            text-transform: uppercase;
+            white-space: nowrap; 
+            overflow: hidden;
         }
 
-        .tool-active { background: var(--hot-pink) !important; box-shadow: 0 0 10px var(--hot-pink); }
+        .tool-btn:hover {
+            background: #333;
+            box-shadow: 0 0 8px rgba(255, 0, 127, 0.4);
+        }
+
+        .tool-active { 
+            background: var(--hot-pink) !important; 
+            box-shadow: 0 0 15px var(--hot-pink); 
+            color: white !important; 
+        }
 
         .code-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; }
         
@@ -74,8 +92,14 @@
 
 <div id="game-container">
     <div id="hacker-side">
-        <h2 style="color: var(--hot-pink); margin:0 0 10px 0;">Red Team: Injection Console (CHECK)</h2>
+        <h2 style="color: var(--hot-pink); margin:0 0 10px 0;">Red Team: Injection Console (IP AUDIT FOCUS)</h2>
+        
         <div class="tool-grid">
+            <button class="tool-btn" id="btn-socket_ip" onclick="showPair('socket_ip')">Socket IP</button>
+            <button class="tool-btn" id="btn-leaked_ip" onclick="showPair('leaked_ip')">Leaked IP</button>
+            <button class="tool-btn" id="btn-masking_ip" onclick="showPair('masking_ip')">Masking IP</button>
+            <button class="tool-btn" id="btn-nameserver_ip" onclick="showPair('nameserver_ip')">Nameserver IP</button>
+
             <button class="tool-btn" id="btn-cpu" onclick="showPair('cpu')">Spoof 8-Core CPU</button>
             <button class="tool-btn" id="btn-ram" onclick="showPair('ram')">Mask Device Memory</button>
             <button class="tool-btn" id="btn-api" onclick="showPair('api')">Mask Native Hooks</button>
@@ -96,10 +120,10 @@
             <button class="tool-btn" id="btn-shadow" onclick="showPair('shadow')">Shadow Nav Props</button>
             <button class="tool-btn" id="btn-orient" onclick="showPair('orient')">Force Landscape</button>
 
-            <button class="tool-btn" style="border-color: #fff;" onclick="showPair('proxy_trap')">Advanced Proxy Trap</button>
-            <button class="tool-btn" style="border-color: #fff;" onclick="showPair('font_bbox')">Font B-Box Audit</button>
-            <button class="tool-btn" style="border-color: #fff;" onclick="showPair('ice_leak')">ICE Candidate Audit</button>
-            <button class="tool-btn" style="border-color: #fff;" onclick="showPair('mobile_emu')">Mobile Emulator Audit</button>
+            <button class="tool-btn" id="btn-proxy_trap" onclick="showPair('proxy_trap')">Advanced Proxy Trap</button>
+            <button class="tool-btn" id="btn-font_bbox" onclick="showPair('font_bbox')">Font B-Box Audit</button>
+            <button class="tool-btn" id="btn-ice_leak" onclick="showPair('ice_leak')">ICE Candidate Audit</button>
+            <button class="tool-btn" id="btn-mobile_emu" onclick="showPair('mobile_emu')">Mobile Emulator Audit</button>
         </div>
 
         <div class="code-container">
@@ -130,7 +154,28 @@
 </div>
 
 <script>
+    // Logic remains identical to previous version, ensuring all forensic variables are present
     const fullStack = {
+        socket_ip: {
+            red: "// RED TEAM: Spoof the 'Claimed' identity.\nheaders['X-Forwarded-For'] = '72.14.201.24';\n// Injecting a trusted residential IP into the packet header.",
+            blue: "// FORENSIC TEAM: Audit Socket vs Connection.\nif (socketIP !== tcpSourceIP) {\n  flag('Socket IP Header Manipulation Detected');\n}",
+            insight: "The Socket IP is just a claim. Forensic teams compare the reported header against the actual TCP source to find manual spoofs."
+        },
+        leaked_ip: {
+            red: "// RED TEAM: Attempt to strip WebRTC candidates.\nRTCPeerConnection.prototype.addIceCandidate = null;\n// Block the browser from revealing local network info.",
+            blue: "// FORENSIC TEAM: Force UDP/STUN Pierce.\npc.onicecandidate = (e) => {\n  if (e.candidate && e.candidate.includes('typ host')) {\n    flag('Leaked IP: Internal origin detected outside tunnel');\n  }\n};",
+            insight: "A Leaked IP is the ultimate 'gotcha.' Even if the Socket IP is clean, WebRTC often bypasses the tunnel to reveal the real origin."
+        },
+        masking_ip: {
+            red: "// RED TEAM: Wrap traffic in a Resident Proxy pool.\n// Route through an intermediary hop to hide the Leaked IP.",
+            blue: "// FORENSIC TEAM: Analyze RTT & Hop Count.\nif (roundTripTime > 200 || hops > 15) {\n  flag('Active Masking IP: Anomalous Network Latency');\n}",
+            insight: "Masking IPs (VPNs/Proxies) introduce latency and packet TTL signatures that don't exist in direct, natural connections."
+        },
+        nameserver_ip: {
+            red: "// RED TEAM: Use a global DNS (8.8.8.8).\n// Failure to match DNS location to the Socket IP location.",
+            blue: "// FORENSIC TEAM: Geo-Distance Audit.\nif (distance(SocketIP, NameserverIP) > 500) {\n  flag('Nameserver IP / Socket IP Location Mismatch');\n}",
+            insight: "If the Socket IP is in Maine but the Nameserver IP is in Oklahoma, the masking tunnel is leaking the user's real-world DNS profile."
+        },
         cpu: {
             red: "// RED TEAM: Overwrite hardware count.\nObject.defineProperty(navigator, 'hardwareConcurrency', {\n  get: () => 8, configurable: true \n});",
             blue: "// FORENSIC TEAM: Measure compute delta.\nif (benchmarkTime > TARGET_8CORE_MS) {\n  flag('Perf-to-Core Ratio Anomaly');\n}",
@@ -235,7 +280,7 @@
 
     function showPair(tool) {
         document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('tool-active'));
-        const btn = document.getElementById(`btn-${tool}`) || document.querySelector(`[onclick="showPair('${tool}')"]`);
+        const btn = document.getElementById(`btn-${tool}`);
         if (btn) btn.classList.add('tool-active');
         
         document.getElementById('red-display').innerText = fullStack[tool].red;
