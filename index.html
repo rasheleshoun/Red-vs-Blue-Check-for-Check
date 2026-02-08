@@ -11,12 +11,13 @@
             --maroon-dark: #1a000d;
             --bg-black: #0a0a0a;
             --warning-orange: #ffae00;
+            --console-green: #00ff41;
         }
 
         body {
             background: var(--bg-black);
             color: #cccccc;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', 'Courier New', sans-serif;
             margin: 0; padding: 20px;
         }
 
@@ -28,7 +29,11 @@
             gap: 20px;
         }
 
-        @media (max-width: 1200px) { #game-container { grid-template-columns: 1fr; } }
+        /* --- UI REFINEMENT: RESPONSIVE GRID --- */
+        @media (max-width: 1100px) {
+            #game-container { grid-template-columns: 1fr; }
+            #audit-side { position: relative !important; top: 0 !important; }
+        }
 
         #hacker-side {
             background: var(--maroon-dark);
@@ -66,228 +71,168 @@
         #audit-side {
             background: #000; border: 2px solid var(--blue-team);
             border-radius: 12px; padding: 20px; position: sticky; top: 20px; height: fit-content;
+            display: flex; flex-direction: column; gap: 15px;
         }
 
         #risk-box { text-align:center; padding: 15px; border: 1px dashed var(--blue-team); background: #000d1a; transition: 0.5s; }
         #risk-value { font-size: 3.5em; font-weight: 900; color: var(--blue-team); }
         
-        .threat-list { color: var(--warning-orange); font-size: 0.8em; margin-top: 10px; max-height: 150px; overflow-y: auto; font-family: monospace; }
-        .reset-btn { margin-top: 15px; background: transparent; color: #555; border: 1px solid #333; cursor: pointer; padding: 5px 10px; font-size: 0.7em; }
+        /* --- UI REFINEMENT: CONSOLE FEED --- */
+        #console-feed {
+            background: #050505;
+            border: 1px solid #222;
+            height: 220px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75em;
+            color: var(--console-green);
+            overflow-y: auto;
+            border-radius: 4px;
+            box-shadow: inset 0 0 10px #000;
+        }
+        .console-entry { margin-bottom: 4px; border-left: 2px solid var(--blue-team); padding-left: 8px; }
+        .console-ts { color: #555; margin-right: 5px; }
+        .console-alert { color: var(--hot-pink); font-weight: bold; }
+
+        .btn-group { display: flex; gap: 10px; }
+        .reset-btn { background: transparent; color: #555; border: 1px solid #333; cursor: pointer; padding: 5px 10px; font-size: 0.7em; }
+        .stress-btn { background: var(--blue-team); color: black; border: none; font-weight: bold; cursor: pointer; padding: 5px 12px; font-size: 0.7em; border-radius: 4px; }
+        .stress-btn:hover { background: white; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
     <div id="hacker-side">
-        <h2 style="color: var(--hot-pink); margin:0 0 15px 0;">Red Team: Full Injection Stack (Restored Comments)</h2>
+        <h2 style="color: var(--hot-pink); margin:0 0 15px 0;">Red Team: Full Injection Stack</h2>
         
         <div class="tool-grid">
             <div class="category-label">IP & Network Forensics</div>
-            <button class="tool-btn" onclick="toggleTool('socket_ip', 15)">Socket IP</button>
-            <button class="tool-btn" onclick="toggleTool('leaked_ip', 40)">Leaked IP</button>
-            <button class="tool-btn" onclick="toggleTool('masking_ip', 20)">Masking IP</button>
-            <button class="tool-btn" onclick="toggleTool('nameserver_ip', 15)">Nameserver IP</button>
-            <button class="tool-btn" onclick="toggleTool('proxy', 25)">Resident Proxy</button>
-            <button class="tool-btn" onclick="toggleTool('ttl', 20)">TCP TTL</button>
-            <button class="tool-btn" onclick="toggleTool('ice_leak', 45)">ICE Leak Audit</button>
-            <button class="tool-btn" onclick="toggleTool('proxy_trap', 40)">Proxy Trap</button>
+            <button class="tool-btn" id="btn-socket_ip" onclick="toggleTool('socket_ip')">Socket IP</button>
+            <button class="tool-btn" id="btn-leaked_ip" onclick="toggleTool('leaked_ip')">Leaked IP</button>
+            <button class="tool-btn" id="btn-masking_ip" onclick="toggleTool('masking_ip')">Masking IP</button>
+            <button class="tool-btn" id="btn-nameserver_ip" onclick="toggleTool('nameserver_ip')">Nameserver IP</button>
+            <button class="tool-btn" id="btn-proxy" onclick="toggleTool('proxy')">Resident Proxy</button>
+            <button class="tool-btn" id="btn-ttl" onclick="toggleTool('ttl')">TCP TTL</button>
+            <button class="tool-btn" id="btn-ice_leak" onclick="toggleTool('ice_leak')">ICE Leak Audit</button>
+            <button class="tool-btn" id="btn-proxy_trap" onclick="toggleTool('proxy_trap')">Proxy Trap</button>
 
             <div class="category-label">Hardware Profile Spoofing</div>
-            <button class="tool-btn" onclick="toggleTool('cpu', 15)">Spoof CPU</button>
-            <button class="tool-btn" onclick="toggleTool('ram', 15)">Mask RAM</button>
-            <button class="tool-btn" onclick="toggleTool('gpu', 20)">WebGL GPU</button>
-            <button class="tool-btn" onclick="toggleTool('ext', 15)">GPU Ext</button>
-            <button class="tool-btn" onclick="toggleTool('bat', 10)">Battery Fuzzer</button>
-            <button class="tool-btn" onclick="toggleTool('audio', 20)">Audio Noise</button>
-            <button class="tool-btn" onclick="toggleTool('canvas', 35)">Poison Canvas</button>
-            <button class="tool-btn" onclick="toggleTool('mobile_emu', 50)">Mobile Emu</button>
+            <button class="tool-btn" id="btn-cpu" onclick="toggleTool('cpu')">Spoof CPU</button>
+            <button class="tool-btn" id="btn-ram" onclick="toggleTool('ram')">Mask RAM</button>
+            <button class="tool-btn" id="btn-gpu" onclick="toggleTool('gpu')">WebGL GPU</button>
+            <button class="tool-btn" id="btn-ext" onclick="toggleTool('ext')">GPU Ext</button>
+            <button class="tool-btn" id="btn-bat" onclick="toggleTool('bat')">Battery Fuzzer</button>
+            <button class="tool-btn" id="btn-audio" onclick="toggleTool('audio')">Audio Noise</button>
+            <button class="tool-btn" id="btn-canvas" onclick="toggleTool('canvas')">Poison Canvas</button>
+            <button class="tool-btn" id="btn-mobile_emu" onclick="toggleTool('mobile_emu')">Mobile Emu</button>
 
             <div class="category-label">Environment Sanitization</div>
-            <button class="tool-btn" onclick="toggleTool('api', 25)">Native Hooks</button>
-            <button class="tool-btn" onclick="toggleTool('view', 30)">Virtual View</button>
-            <button class="tool-btn" onclick="toggleTool('tz', 15)">Fix TZ Drift</button>
-            <button class="tool-btn" onclick="toggleTool('font', 10)">Font List</button>
-            <button class="tool-btn" onclick="toggleTool('agent', 25)">User-Agent</button>
-            <button class="tool-btn" onclick="toggleTool('shadow', 30)">Shadow Props</button>
-            <button class="tool-btn" onclick="toggleTool('orient', 15)">Orientation</button>
-            <button class="tool-btn" onclick="toggleTool('font_bbox', 35)">Font B-Box</button>
+            <button class="tool-btn" id="btn-api" onclick="toggleTool('api')">Native Hooks</button>
+            <button class="tool-btn" id="btn-view" onclick="toggleTool('view')">Virtual View</button>
+            <button class="tool-btn" id="btn-tz" onclick="toggleTool('tz')">Fix TZ Drift</button>
+            <button class="tool-btn" id="btn-font" onclick="toggleTool('font')">Font List</button>
+            <button class="tool-btn" id="btn-agent" onclick="toggleTool('agent')">User-Agent</button>
+            <button class="tool-btn" id="btn-shadow" onclick="toggleTool('shadow')">Shadow Props</button>
+            <button class="tool-btn" id="btn-orient" onclick="toggleTool('orient')">Orientation</button>
+            <button class="tool-btn" id="btn-font_bbox" onclick="toggleTool('font_bbox')">Font B-Box</button>
         </div>
 
         <div class="code-container">
-            <div><div class="code-box" id="red-display" style="color:#00ff00;">// Red Team Injection...</div></div>
-            <div><div class="code-box" id="blue-display" style="color:var(--blue-team);">// Forensic Logic...</div></div>
+            <div><div class="code-box" id="red-display" style="color:#00ff00;">// Red Team Injection Source...</div></div>
+            <div><div class="code-box" id="blue-display" style="color:var(--blue-team);">// Forensic Audit Logic...</div></div>
         </div>
     </div>
 
     <div id="audit-side">
-        <h2 style="color: var(--blue-team); margin:0 0 10px 0;">Forensic Audit Engine</h2>
+        <h2 style="color: var(--blue-team); margin:0;">Forensic Audit Engine</h2>
+        
         <div id="risk-box">
             <small>ANOMALY RISK SCORE</small>
             <div id="risk-value">0%</div>
             <div id="verdict">CLEAN BASELINE</div>
         </div>
-        
-        <div class="threat-list" id="threat-list">No anomalies detected.</div>
-        <div class="audit-summary" style="border-top: 1px solid #333; padding-top:15px; margin-top:15px;">
+
+        <div style="font-size: 0.85em;">
             <strong>Investigator Insight:</strong><br>
-            <span id="forensic-insight" style="font-style:italic;">Analyze how we deconstruct "Frankenstein" devices.</span>
+            <span id="forensic-insight" style="font-style:italic; color: #aaa;">Initialize injections to begin forensic trace.</span>
         </div>
-        <button class="reset-btn" onclick="resetAudit()">RESET ENVIRONMENT</button>
+
+        <div>
+            <small style="color: var(--blue-team); font-weight: bold; letter-spacing: 1px;">LIVE EVENT LOG</small>
+            <div id="console-feed">
+                <div class="console-entry">> Audit engine initialized. Waiting for packets...</div>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="stress-btn" onclick="startStressTest()">INIT STRESS TEST</button>
+            <button class="reset-btn" onclick="resetAudit()">RESET ENVIRONMENT</button>
+        </div>
     </div>
 </div>
 
 <script>
     const fullStack = {
-        socket_ip: {
-            red: "// RED TEAM: Spoof the 'Claimed' identity.\nheaders['X-Forwarded-For'] = '72.14.201.24';\n// Injecting a trusted residential IP into the packet header.",
-            blue: "// FORENSIC TEAM: Audit Socket vs Connection.\nif (socketIP !== tcpSourceIP) {\n  flag('Socket IP Header Manipulation Detected');\n}",
-            insight: "The Socket IP is just a claim. Forensic teams compare the reported header against the actual TCP source to find manual spoofs."
-        },
-        leaked_ip: {
-            red: "// RED TEAM: Attempt to strip WebRTC candidates.\nRTCPeerConnection.prototype.addIceCandidate = null;\n// Block the browser from revealing local network info.",
-            blue: "// FORENSIC TEAM: Force UDP/STUN Pierce.\npc.onicecandidate = (e) => {\n  if (e.candidate && e.candidate.includes('typ host')) {\n    flag('Leaked IP: Internal origin detected outside tunnel');\n  }\n};",
-            insight: "A Leaked IP is the ultimate 'gotcha.' Even if the Socket IP is clean, WebRTC often bypasses the tunnel to reveal the real origin."
-        },
-        masking_ip: {
-            red: "// RED TEAM: Wrap traffic in a Resident Proxy pool.\n// Route through an intermediary hop to hide the Leaked IP.",
-            blue: "// FORENSIC TEAM: Analyze RTT & Hop Count.\nif (roundTripTime > 200 || hops > 15) {\n  flag('Active Masking IP: Anomalous Network Latency');\n}",
-            insight: "Masking IPs (VPNs/Proxies) introduce latency and packet TTL signatures that don't exist in direct, natural connections."
-        },
-        nameserver_ip: {
-            red: "// RED TEAM: Use a global DNS (8.8.8.8).\n// Failure to match DNS location to the Socket IP location.",
-            blue: "// FORENSIC TEAM: Geo-Distance Audit.\nif (distance(SocketIP, NameserverIP) > 500) {\n  flag('Nameserver IP / Socket IP Location Mismatch');\n}",
-            insight: "If the Socket IP is in Maine but the Nameserver IP is in Oklahoma, the masking tunnel is leaking the user's real-world DNS profile."
-        },
-        cpu: {
-            red: "// RED TEAM: Overwrite hardware count.\nObject.defineProperty(navigator, 'hardwareConcurrency', {\n  get: () => 8, configurable: true \n});",
-            blue: "// FORENSIC TEAM: Measure compute delta.\nif (benchmarkTime > TARGET_8CORE_MS) {\n  flag('Perf-to-Core Ratio Anomaly');\n}",
-            insight: "Forensic teams flag devices where the reported CPU power doesn't match the actual execution time for math stress tests."
-        },
-        ram: {
-            red: "// RED TEAM: Mask memory to 16GB.\nObject.defineProperty(navigator, 'deviceMemory', {\n  get: () => 16, configurable: true \n});",
-            blue: "// FORENSIC TEAM: Check hardware pairing logic.\nif (ram >= 16 && cores <= 2) {\n  flag('Impossible Hardware Profile');\n}",
-            insight: "High-end memory with low-end compute is a primary signature of a manually constructed 'Frankenstein' device."
-        },
-        api: {
-            red: "// RED TEAM: Mask the interception layer.\nsetTimeout.toString = () => 'function setTimeout() { [native code] }';",
-            blue: "// FORENSIC TEAM: Audit via prototype call.\nif (!Function.prototype.toString.call(fn).includes('[native code]')) {\n  flag('Hooked Native Function');\n}",
-            insight: "Auditors bypass simple masking by calling the original Prototype string to see if a function is truly native."
-        },
-        view: {
-            red: "// RED TEAM: Force desktop resolution.\nwindow.innerWidth = 1920; screen.width = 1920;",
-            blue: "// FORENSIC TEAM: Check coordinate sanity.\nif (window.outerWidth < window.innerWidth) {\n  flag('Coordinate Consistency Failure');\n}",
-            insight: "A physical window cannot be wider than its own outer frame. Inconsistent viewports are an immediate forensic red flag."
-        },
-        gpu: {
-            red: "// RED TEAM: Change reported GPU vendor.\ngl.getParameter(UNMASKED_RENDERER_WEBGL) = 'NVIDIA 4090';",
-            blue: "// FORENSIC TEAM: Compare vendor vs renderer logic.\nif (vendor === 'NVIDIA' && renderer === 'SwiftShader') {\n  flag('Software Renderer Leak');\n}",
-            insight: "If the vendor says NVIDIA but the browser falls back to a software renderer like SwiftShader, the GPU is spoofed."
-        },
-        ext: {
-            red: "// RED TEAM: Report advanced GPU capabilities.\ngl.getSupportedExtensions().push('WEBGL_draw_buffers');",
-            blue: "// FORENSIC TEAM: Verify functional extension support.\nif (extSupported && !canActuallyDrawToBuffers()) {\n  flag('GPU Capability Mismatch');\n}",
-            insight: "Forensic teams verify if the GPU can actually perform the functions it claims to support via extensions."
-        },
-        canvas: {
-            red: "// RED TEAM: Inject pixel-level noise.\nctx.getImageData = () => { /* Noise injection */ };",
-            blue: "// FORENSIC TEAM: Analyze global entropy.\nif (isUniqueInGlobalPool(hash)) {\n  flag('Artificially Poisoned Canvas');\n}",
-            insight: "A hash that is 100% unique across millions of users is statistically artificial and indicates active poisoning."
-        },
-        tz: {
-            red: "// RED TEAM: Match proxy timezone.\nIntl.DateTimeFormat.prototype.resolvedOptions = () => ({ timeZone: 'Chicago' });",
-            blue: "// FORENSIC TEAM: Check clock skew vs offset.\nif (new Date().getTimezoneOffset() !== chicagoOffset) {\n  flag('Temporal Offset Mismatch');\n}",
-            insight: "Even if the zone name is changed, the system clock's millisecond offset often leaks the true location."
-        },
-        proxy: {
-            red: "// RED TEAM: Route through Resident Proxy pool.\n// Uses backconnect/rotating gateways.",
-            blue: "// FORENSIC TEAM: Audit Latency & Jitter.\nconst jitter = Math.abs(ping1 - ping2);\nif (jitter > 150 || packetLoss > 0.05) {\n  flag('Resident Proxy Network Profile');\n}",
-            insight: "Resident proxies are often slow and inconsistent. High jitter or TCP retransmissions signal a proxied or mangled connection."
-        },
-        ttl: {
-            red: "// RED TEAM: Set OS-specific TCP/IP stack signals.\n// Requires Registry edit to look like Mac (TTL 64).",
-            blue: "// FORENSIC TEAM: Inspect TCP/IP stack signals.\nif (userAgent.includes('Mac') && tcpTTL !== 64) {\n  flag('OS-Stack Identity Conflict');\n}",
-            insight: "TCP TTL is OS-specific. A 'Mac' browser sending a Windows-default TTL of 128 is a dead giveaway of a Frankenstein device."
-        },
-        bat: {
-            red: "// RED TEAM: Fix battery level.\nnavigator.getBattery = () => Promise.resolve({ level: 0.85 });",
-            blue: "// FORENSIC TEAM: Audit discharge drift.\nif (level === 0.85 && dischargeDelta === 0) {\n  flag('Static Battery Signature');\n}",
-            insight: "Real hardware always shows active discharge. A frozen battery level is a hardcoded spoof signature."
-        },
-        font: {
-            red: "// RED TEAM: Report only generic system fonts.\ndocument.fonts.query = () => ['Arial', 'Helvetica'];",
-            blue: "// FORENSIC TEAM: Check font list entropy.\nif (fonts.length < 5) {\n  flag('Environment Sanitization Detected');\n}",
-            insight: "Reporting too few fonts is actually more suspicious than reporting many; it signals a hardened environment."
-        },
-        audio: {
-            red: "// RED TEAM: Add jitter to the audio sample rate.\nconst noise = Math.random() * 0.0001;",
-            blue: "// FORENSIC TEAM: Audit noise floor stasis.\nif (audioCtx.sampleRate !== hardwareExpected) {\n  flag('Impossible Audio Profile');\n}",
-            insight: "Artificial jitter in the audio context contradicts the precision of real hardware sample rates."
-        },
-        agent: {
-            red: "// RED TEAM: Change UA to high-value device.\nnavigator.userAgent = 'iPhone...';",
-            blue: "// FORENSIC TEAM: Cross-check Platform ID.\nif (ua.includes('iPhone') && platform === 'Win32') {\n  flag('UA vs Platform Mismatch');\n}",
-            insight: "Forensic teams flag when the high-level User-Agent conflicts with low-level kernel architecture reports."
-        },
-        shadow: {
-            red: "// RED TEAM: Use descriptors to hide property changes.\nObject.defineProperty(navigator, 'languages', { configurable: true });",
-            blue: "// FORENSIC TEAM: Attempt property deletion.\nif (delete navigator.languages === true) {\n  flag('Shadowed Property Detected');\n}",
-            insight: "Native properties are non-configurable. If an auditor can delete 'navigator.languages', it has been shadowed."
-        },
-        orient: {
-            red: "// RED TEAM: Force landscape to match desktop spoof.\nscreen.orientation.lock('landscape-primary');",
-            blue: "// FORENSIC TEAM: Compare Aspect Ratio vs Orient.\nif (height > width && orientation === 'landscape') {\n  flag('Orientation Logic Conflict');\n}",
-            insight: "A portrait-sized resolution claiming to be 'Landscape' is a classic Frankenstein error."
-        },
-        proxy_trap: {
-            red: "// RED TEAM: Proxy wrap the Navigator object.\nnavigator = new Proxy(navigator, { get: (t, p) => t[p] });",
-            blue: "// FORENSIC TEAM: Detect Proxy via error stack.\ntry { navigator.plugins.arguments; } \ncatch (e) { if (e.message.includes('Proxy')) flag('JS Proxy Detected'); }",
-            insight: "Accessing non-existent properties on a Proxy often throws unique engine-level errors that native objects won't."
-        },
-        font_bbox: {
-            red: "// RED TEAM: Report custom fonts as present.\nwindow.fonts = ['Roboto', 'Open Sans'];",
-            blue: "// FORENSIC TEAM: Measure bounding box width.\nif (span.offsetWidth === arialWidth && name !== 'Arial') {\n  flag('Font Masking Detected');\n}",
-            insight: "If a font claims to be 'Roboto' but its pixel width matches 'Arial', the browser has triggered a fallback."
-        },
-        ice_leak: {
-            red: "// RED TEAM: Mask the leak by forcing mDNS or stripping candidates.\nRTCPeerConnection.prototype.addIceCandidate = () => Promise.resolve();",
-            blue: "// FORENSIC TEAM: Force out-of-band STUN query.\npc.onicecandidate = (e) => {\n  if (e.candidate && e.candidate.candidate.includes('typ host')) {\n    flag('VPN Bypass: Local IP Leaked via ICE');\n  }\n};",
-            insight: "WebRTC operates outside the proxy tunnel. Forensic engines force a STUN request to reveal the real local IP."
-        },
-        mobile_emu: {
-            red: "// RED TEAM: Emulate iPhone on high-end server.\nObject.defineProperty(navigator, 'platform', { get: () => 'iPhone' });",
-            blue: "// FORENSIC TEAM: Audit sensor stasis & core density.\nif (platform === 'iPhone' && Math.abs(x_accel + y_accel) === 0) {\n  flag('Sensor Stasis: Synthetic Environment');\n} else if (cores > 12) {\n  flag('Core Density: Server Profile detected');\n}",
-            insight: "Emulators lack real sensor noise and often leak server-level core counts (32+) that don't exist on phones."
-        }
+        socket_ip: { red: "// RED TEAM: Spoof the 'Claimed' identity.\nheaders['X-Forwarded-For'] = '72.14.201.24';\n// Injecting a trusted residential IP into the packet header.", blue: "// FORENSIC TEAM: Audit Socket vs Connection.\nif (socketIP !== tcpSourceIP) {\n  flag('Socket IP Header Manipulation Detected');\n}", insight: "Compares reported headers against actual TCP source to find manual spoofs.", weight: 15 },
+        leaked_ip: { red: "// RED TEAM: Attempt to strip WebRTC candidates.\nRTCPeerConnection.prototype.addIceCandidate = null;\n// Block the browser from revealing local network info.", blue: "// FORENSIC TEAM: Force UDP/STUN Pierce.\npc.onicecandidate = (e) => {\n  if (e.candidate && e.candidate.includes('typ host')) {\n    flag('Leaked IP: Internal origin detected outside tunnel');\n  }\n};", insight: "WebRTC often bypasses the tunnel to reveal the real origin.", weight: 40 },
+        masking_ip: { red: "// RED TEAM: Wrap traffic in a Resident Proxy pool.\n// Route through an intermediary hop to hide the Leaked IP.", blue: "// FORENSIC TEAM: Analyze RTT & Hop Count.\nif (roundTripTime > 200 || hops > 15) {\n  flag('Active Masking IP: Anomalous Network Latency');\n}", insight: "Masking IPs introduce latency signatures not found in direct connections.", weight: 20 },
+        nameserver_ip: { red: "// RED TEAM: Use a global DNS (8.8.8.8).\n// Failure to match DNS location to the Socket IP location.", blue: "// FORENSIC TEAM: Geo-Distance Audit.\nif (distance(SocketIP, NameserverIP) > 500) {\n  flag('Nameserver IP / Socket IP Location Mismatch');\n}", insight: "Mismatching DNS location leaks the user's real-world profile.", weight: 15 },
+        cpu: { red: "// RED TEAM: Overwrite hardware count.\nObject.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });", blue: "// FORENSIC TEAM: Measure compute delta.\nif (benchmarkTime > TARGET_8CORE_MS) {\n  flag('Perf-to-Core Ratio Anomaly');\n}", insight: "Flags devices where CPU power doesn't match reported core count.", weight: 15 },
+        ram: { red: "// RED TEAM: Mask memory to 16GB.\nObject.defineProperty(navigator, 'deviceMemory', { get: () => 16 });", blue: "// FORENSIC TEAM: Check hardware pairing logic.\nif (ram >= 16 && cores <= 2) {\n  flag('Impossible Hardware Profile');\n}", insight: "High RAM with low compute is a signature of synthetic devices.", weight: 15 },
+        api: { red: "// RED TEAM: Mask the interception layer.\nsetTimeout.toString = () => 'function setTimeout() { [native code] }';", blue: "// FORENSIC TEAM: Audit via prototype call.\nif (!Function.prototype.toString.call(fn).includes('[native code]')) {\n  flag('Hooked Native Function');\n}", insight: "Bypasses simple masking by calling the original Prototype string.", weight: 25 },
+        view: { red: "// RED TEAM: Force desktop resolution.\nwindow.innerWidth = 1920; screen.width = 1920;", blue: "// FORENSIC TEAM: Check coordinate sanity.\nif (window.outerWidth < window.innerWidth) {\n  flag('Coordinate Consistency Failure');\n}", insight: "Physical windows cannot be wider than their own frames.", weight: 30 },
+        gpu: { red: "// RED TEAM: Change reported GPU vendor.\ngl.getParameter(RENDERER) = 'NVIDIA 4090';", blue: "// FORENSIC TEAM: Compare vendor vs renderer logic.\nif (vendor === 'NVIDIA' && renderer === 'SwiftShader') {\n  flag('Software Renderer Leak');\n}", insight: "Software renderers reveal spoofed high-end hardware names.", weight: 20 },
+        ext: { red: "// RED TEAM: Report advanced GPU capabilities.\ngl.getSupportedExtensions().push('WEBGL_draw_buffers');", blue: "// FORENSIC TEAM: Verify functional extension support.\nif (extSupported && !canActuallyDrawToBuffers()) {\n  flag('GPU Capability Mismatch');\n}", insight: "Verifies if the GPU can actually perform functions it claims to support.", weight: 15 },
+        canvas: { red: "// RED TEAM: Inject pixel-level noise.\nctx.getImageData = () => { /* Noise injection */ };", blue: "// FORENSIC TEAM: Analyze global entropy.\nif (isUniqueInGlobalPool(hash)) {\n  flag('Artificially Poisoned Canvas');\n}", insight: "100% unique hashes across millions of users are statistically artificial.", weight: 35 },
+        tz: { red: "// RED TEAM: Match proxy timezone.\nIntl.DateTimeFormat = () => ({ timeZone: 'Chicago' });", blue: "// FORENSIC TEAM: Check clock skew vs offset.\nif (new Date().getTimezoneOffset() !== chicagoOffset) {\n  flag('Temporal Offset Mismatch');\n}", insight: "The system clock offset often leaks the true location.", weight: 15 },
+        proxy: { red: "// RED TEAM: Route through Resident Proxy pool.", blue: "// FORENSIC TEAM: Audit Latency & Jitter.\nif (jitter > 150) { flag('Resident Proxy Network Profile'); }", insight: "High jitter or TCP retransmissions signal a proxied connection.", weight: 25 },
+        ttl: { red: "// RED TEAM: Set OS-specific TCP/IP stack signals (TTL 64).", blue: "// FORENSIC TEAM: Inspect stack signals.\nif (ua.includes('Win') && tcpTTL === 64) { flag('OS-Stack Identity Conflict'); }", insight: "TCP TTL is OS-specific; mismatch reveals a 'Frankenstein' device.", weight: 20 },
+        bat: { red: "// RED TEAM: Fix battery level.\nnavigator.getBattery = () => Promise.resolve({ level: 0.85 });", blue: "// FORENSIC TEAM: Audit discharge drift.\nif (dischargeDelta === 0) { flag('Static Battery Signature'); }", insight: "Real hardware always shows active discharge; static levels are spoofs.", weight: 10 },
+        font: { red: "// RED TEAM: Report only generic system fonts.", blue: "// FORENSIC TEAM: Check font list entropy.\nif (fonts.length < 5) { flag('Environment Sanitization Detected'); }", insight: "Reporting too few fonts is suspicious; it signals a hardened environment.", weight: 10 },
+        audio: { red: "// RED TEAM: Add jitter to audio sample rate.", blue: "// FORENSIC TEAM: Audit noise floor stasis.\nif (audioCtx.sampleRate !== hardwareExpected) { flag('Impossible Audio Profile'); }", insight: "Artificial jitter contradicts the precision of real hardware sample rates.", weight: 20 },
+        agent: { red: "// RED TEAM: Change UA to high-value device.", blue: "// FORENSIC TEAM: Cross-check Platform ID.\nif (ua.includes('iPhone') && platform === 'Win32') { flag('UA vs Platform Mismatch'); }", insight: "Flags when UA conflicts with low-level kernel architecture.", weight: 25 },
+        shadow: { red: "// RED TEAM: Use descriptors to hide property changes.", blue: "// FORENSIC TEAM: Attempt property deletion.\nif (delete navigator.languages === true) { flag('Shadowed Property Detected'); }", insight: "Native properties are non-configurable; deletability implies shadowing.", weight: 30 },
+        orient: { red: "// RED TEAM: Force landscape to match desktop spoof.", blue: "// FORENSIC TEAM: Compare Aspect Ratio vs Orient.\nif (height > width && orientation === 'landscape') { flag('Orientation Logic Conflict'); }", insight: "Portrait resolution claiming landscape is a logic error.", weight: 15 },
+        proxy_trap: { red: "// RED TEAM: Proxy wrap the Navigator object.", blue: "// FORENSIC TEAM: Detect Proxy via error stack.\ntry { nav.plugins.args; } catch (e) { if (e.message.includes('Proxy')) flag(); }", insight: "JS Proxies throw unique engine errors on non-existent properties.", weight: 40 },
+        font_bbox: { red: "// RED TEAM: Report custom fonts as present.", blue: "// FORENSIC TEAM: Measure bounding box width.\nif (w === arialW && name !== 'Arial') { flag('Font Masking Detected'); }", insight: "Pixel width matching Arial while claiming another font is a fallback.", weight: 35 },
+        ice_leak: { red: "// RED TEAM: Mask leak by stripping candidates.", blue: "// FORENSIC TEAM: Force out-of-band STUN query.\nif (e.candidate.includes('typ host')) { flag('VPN Bypass: Local IP Leaked'); }", insight: "Forces a STUN request to reveal the real local IP behind a tunnel.", weight: 45 },
+        mobile_emu: { red: "// RED TEAM: Emulate iPhone on high-end server.", blue: "// FORENSIC TEAM: Audit sensor stasis.\nif (platform === 'iPhone' && accel === 0) { flag('Sensor Stasis: Synthetic Env'); }", insight: "Emulators lack real sensor noise and leak server-level core counts.", weight: 50 }
     };
 
     let activeTools = new Set();
-    const weights = { 
-        socket_ip: 15, leaked_ip: 40, masking_ip: 20, nameserver_ip: 15, proxy: 25, ttl: 20, ice_leak: 45, proxy_trap: 40,
-        cpu: 15, ram: 15, gpu: 20, ext: 15, bat: 10, audio: 20, canvas: 35, mobile_emu: 50,
-        api: 25, view: 30, tz: 15, font: 10, agent: 25, shadow: 30, orient: 15, font_bbox: 35
-    };
+    let isStressTesting = false;
 
     function toggleTool(tool) {
-        const btn = event.target;
-        if (activeTools.has(tool)) {
-            activeTools.delete(tool);
-            btn.classList.remove('tool-active');
-        } else {
+        if (isStressTesting) return; // Disable manual toggle during stress test
+        const btn = document.getElementById(`btn-${tool}`);
+        const isAdding = !activeTools.has(tool);
+
+        if (isAdding) {
             activeTools.add(tool);
             btn.classList.add('tool-active');
+            logEvent(`ALERT: Injection [${tool.toUpperCase()}] successfully hooked.`, true);
+        } else {
+            activeTools.delete(tool);
+            btn.classList.remove('tool-active');
+            logEvent(`CLEARED: Trace for [${tool.toUpperCase()}] purged.`);
         }
         updateAudit(tool);
     }
 
+    function logEvent(msg, isAlert = false) {
+        const feed = document.getElementById('console-feed');
+        const ts = new Date().toLocaleTimeString([], { hour12: false });
+        const entry = document.createElement('div');
+        entry.className = 'console-entry' + (isAlert ? ' console-alert' : '');
+        entry.innerHTML = `<span class="console-ts">[${ts}]</span> ${msg}`;
+        feed.appendChild(entry);
+        feed.scrollTop = feed.scrollHeight; // Auto-scroll to bottom
+    }
+
     function updateAudit(lastTool) {
         let totalWeight = 0;
-        const list = document.getElementById('threat-list');
-        list.innerHTML = "";
-        
-        activeTools.forEach(t => {
-            totalWeight += weights[t];
-            list.innerHTML += `<div style="margin-bottom:2px;">[!] FLAG: ${t.toUpperCase().replace('_', ' ')}</div>`;
-        });
+        activeTools.forEach(t => totalWeight += fullStack[t].weight);
 
         const score = Math.min(totalWeight, 100);
         document.getElementById('risk-value').innerText = score + "%";
@@ -298,27 +243,50 @@
         if (score === 0) {
             verdict.innerText = "CLEAN BASELINE";
             riskBox.style.borderColor = "var(--blue-team)";
-            list.innerText = "No anomalies detected.";
+            riskBox.style.background = "#000d1a";
         } else if (score < 50) {
             verdict.innerText = "SUSPICIOUS ACTIVITY";
             riskBox.style.borderColor = "var(--warning-orange)";
+            riskBox.style.background = "#1a0d00";
         } else {
             verdict.innerText = "FRANKENSTEIN DEVICE DETECTED";
             riskBox.style.borderColor = "var(--hot-pink)";
+            riskBox.style.background = "#1a0005";
         }
 
-        if (lastTool && activeTools.has(lastTool)) {
+        if (lastTool && fullStack[lastTool]) {
             document.getElementById('red-display').innerText = fullStack[lastTool].red;
             document.getElementById('blue-display').innerText = fullStack[lastTool].blue;
             document.getElementById('forensic-insight').innerText = fullStack[lastTool].insight;
         }
     }
 
+    async function startStressTest() {
+        if (isStressTesting) return;
+        isStressTesting = true;
+        resetAudit();
+        logEvent("WARNING: INITIATING FULL SYSTEM STRESS TEST...", true);
+        
+        const tools = Object.keys(fullStack);
+        for (const tool of tools) {
+            await new Promise(r => setTimeout(r, 200)); // Delay for effect
+            const btn = document.getElementById(`btn-${tool}`);
+            activeTools.add(tool);
+            btn.classList.add('tool-active');
+            logEvent(`CRITICAL: External spoof detected at point [${tool}]`, true);
+            updateAudit(tool);
+        }
+        
+        logEvent("STRESS TEST COMPLETE: 100% ANOMALY DENSITY REACHED.", true);
+        isStressTesting = false;
+    }
+
     function resetAudit() {
         activeTools.clear();
         document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('tool-active'));
-        document.getElementById('red-display').innerText = "// Red Team Injection...";
-        document.getElementById('blue-display').innerText = "// Forensic Logic...";
+        document.getElementById('console-feed').innerHTML = '<div class="console-entry">> Audit reset. Monitoring link re-established.</div>';
+        document.getElementById('red-display').innerText = "// Red Team Injection Source...";
+        document.getElementById('blue-display').innerText = "// Forensic Audit Logic...";
         updateAudit();
     }
 </script>
