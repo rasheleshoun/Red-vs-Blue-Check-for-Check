@@ -84,6 +84,7 @@
             <button class="tool-btn" id="btn-nameserver_ip" onclick="toggleTool('nameserver_ip')">Nameserver IP</button>
             <button class="tool-btn" id="btn-ttl" onclick="toggleTool('ttl')">TCP TTL</button>
             <button class="tool-btn" id="btn-ice_leak" onclick="toggleTool('ice_leak')">ICE Leak</button>
+            <button class="tool-btn" id="btn-vpn_bypass" onclick="toggleTool('vpn_bypass')">VPN Bypass</button>
 
             <div class="category-label">Mobile Physical Invariants</div>
             <button class="tool-btn" id="btn-motion" onclick="toggleTool('motion')">Motion Entropy</button>
@@ -148,9 +149,9 @@
             insight: "Verifies if the 'claimed' IP matches the actual TCP connection origin.", weight: 15 
         },
         leaked_ip: { 
-            red: "// RED TEAM: Attempt to strip WebRTC candidates.\n// Overwrites the WebRTC API to prevent gathering local network addresses.\nRTCPeerConnection.prototype.addIceCandidate = null;", 
-            blue: "// BLUE TEAM: Force UDP/STUN Pierce.\n// Monitors events for 'host' candidates which bypass VPN/Proxy tunnels.\nif (e.candidate.includes('typ host')) {\n  flag('Leaked IP: Internal origin detected outside tunnel');\n}", 
-            insight: "WebRTC often bypasses VPNs to reveal the real internal IP.", weight: 40 
+            red: "// RED TEAM: WebRTC API Hook\n// Overwrites the prototype to return a null\n// state, breaking the discovery request.\nRTCPeerConnection.prototype.createOffer = function() {\n  return Promise.resolve(null);\n};", 
+            blue: "// BLUE TEAM: Prototype Audit\n// Detects 'API Shadowing' by checking if the\n// native browser function has been replaced.\nif (!RTCPeerConnection.prototype.createOffer.toString().includes('[native code]')) {\n  flag('Injection Alert: API Layer Masked');\n}", 
+            insight: "Attacker is shadowing native APIs to hide network discovery attempts.", weight: 40 
         },
         proxy: { 
             red: "// RED TEAM: Route through Resident Proxy pool.\n// Hides data-center origin behind a home-user IP node.", 
@@ -173,9 +174,14 @@
             insight: "TCP TTL values are OS-specific; mismatch reveals custom packet forgeries.", weight: 20 
         },
         ice_leak: { 
-            red: "// RED TEAM: Mask leak by stripping candidates.\n// Strips private IPs from WebRTC to hide the real local origin.", 
-            blue: "// BLUE TEAM: Force out-of-band STUN query.\n// Forces a STUN request to reveal the real local IP behind a tunnel.\nif (e.candidate.includes('typ host')) { flag('VPN Bypass: Local IP Leaked'); }", 
-            insight: "Checks if the browser is revealing internal network info behind a VPN.", weight: 45 
+            red: "// RED TEAM: ICE Candidate Filter\n// Monitors the event and purges 'host' candidates\n// before the application can read them.\nRTCPeerConnection.prototype.onicecandidate = (e) => {\n  if (e.candidate && e.candidate.candidate.includes('typ host')) return null;\n};", 
+            blue: "// BLUE TEAM: Protocol Anomaly\n// Flags connections missing standard 'host'\n// candidates, typical of custom fraud stacks.\nif (candidates.length > 0 && !hasHostCandidate(candidates)) {\n  flag('Protocol Anomaly: Intentional ICE Purge');\n}", 
+            insight: "The device is surgically stripping local IP candidates at the protocol layer.", weight: 45 
+        },
+        vpn_bypass: {
+            red: "// RED TEAM: STUN Injection\n// Forces a STUN request to reveal the real local\n// IP behind a tunnel by bypassing the proxy stack.\nconst pc = new RTCPeerConnection({\n  iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]\n});",
+            blue: "// BLUE TEAM: Gateway Mismatch Detection\n// Triggers an alarm if the IP returned via STUN\n// differs from the active session gateway.\nif (webrtcIP !== sessionGatewayIP) {\n  flag('VPN Bypass: True Origin Unmasked');\n}",
+            insight: "An active STUN query is attempting to route identity traffic outside the VPN.", weight: 50
         },
         motion: {
             red: "// RED TEAM: Inject static accelerometer data.\n// Attempts to hide the fact that there is no physical motion by spoofing Earth gravity.\nwindow.DeviceMotionEvent = { acceleration: {x: 0, y: 0, z: 9.8} };",
